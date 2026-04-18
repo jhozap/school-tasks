@@ -2,7 +2,6 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { setActiveWorkspaceCookie } from '@/lib/workspace'
 
 export async function register(formData: FormData) {
   const supabase = await createClient()
@@ -10,8 +9,7 @@ export async function register(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const fullName = (formData.get('full_name') as string).trim()
-  const workspaceName = (formData.get('workspace_name') as string | null)?.trim() || `${fullName || 'Mis'} tareas`
-  const next = (formData.get('next') as string) || '/'
+  const next = (formData.get('next') as string) || '/onboarding'
   const avatarFile = formData.get('avatar') as File | null
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -37,20 +35,5 @@ export async function register(formData: FormData) {
     }
   }
 
-  const { data: ws, error: wsError } = await supabase
-    .from('workspaces')
-    .insert({ name: workspaceName, created_by: userId })
-    .select('id')
-    .single()
-
-  if (wsError || !ws) return { error: wsError?.message ?? 'Error creando workspace' }
-
-  const { error: wuError } = await supabase
-    .from('workspace_users')
-    .insert({ workspace_id: ws.id, user_id: userId })
-
-  if (wuError) return { error: wuError.message }
-
-  await setActiveWorkspaceCookie(ws.id)
   redirect(next)
 }

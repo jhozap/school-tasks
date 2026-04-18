@@ -8,6 +8,7 @@ import { BottomNav } from '@/components/layout/BottomNav'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { Suspense } from 'react'
+import { redirect } from 'next/navigation'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import type { TaskWithAttachments, Workspace } from '@/types'
 
@@ -30,6 +31,8 @@ export default async function HomePage({ searchParams }: Props) {
   const workspaces: Workspace[] = (wsData ?? [])
     .map(row => row.workspaces as unknown as Workspace)
     .filter(Boolean)
+
+  if (workspaces.length === 0) redirect('/onboarding')
 
   let tasks: TaskWithAttachments[] = []
 
