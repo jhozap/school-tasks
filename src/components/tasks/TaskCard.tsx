@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { toggleTask, deleteTask } from '@/app/(app)/actions'
 import { TaskModal } from './TaskModal'
-import type { Task } from '@/types'
+import { AttachmentPanel } from './AttachmentPanel'
+import type { TaskWithAttachments } from '@/types'
 
 interface Props {
-  task: Task
+  task: TaskWithAttachments
+  workspaceId: string
 }
 
 function formatDate(dateStr: string) {
@@ -14,7 +16,7 @@ function formatDate(dateStr: string) {
   return date.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
-function getAccentColor(task: Task) {
+function getAccentColor(task: TaskWithAttachments) {
   if (task.status === 'completed') return 'var(--chart-3)'
   if (!task.due_date) return 'var(--chart-2)'
   const today = new Date()
@@ -26,7 +28,7 @@ function getAccentColor(task: Task) {
   return 'var(--chart-2)'
 }
 
-export function TaskCard({ task }: Props) {
+export function TaskCard({ task, workspaceId }: Props) {
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -88,14 +90,17 @@ export function TaskCard({ task }: Props) {
               {task.due_date && (
                 <p
                   className="text-xs mt-2 font-medium"
-                  style={{
-                    fontFamily: 'var(--font-inter)',
-                    color: getAccentColor(task),
-                  }}
+                  style={{ fontFamily: 'var(--font-inter)', color: getAccentColor(task) }}
                 >
                   {formatDate(task.due_date)}
                 </p>
               )}
+
+              <AttachmentPanel
+                attachments={task.attachments ?? []}
+                taskId={task.id}
+                workspaceId={workspaceId}
+              />
             </div>
 
             <div className="flex gap-1 flex-shrink-0">

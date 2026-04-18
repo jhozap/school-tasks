@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/login/actions'
 import { Button } from '@/components/ui/button'
 import { TaskList } from '@/components/tasks/TaskList'
-import type { Task } from '@/types'
+import type { TaskWithAttachments } from '@/types'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -14,14 +14,16 @@ export default async function HomePage() {
     .eq('user_id', user!.id)
     .single()
 
-  let tasks: Task[] = []
-  if (wsUser?.workspace_id) {
+  let tasks: TaskWithAttachments[] = []
+  const workspaceId = wsUser?.workspace_id ?? ''
+
+  if (workspaceId) {
     const { data } = await supabase
       .from('tasks')
-      .select('*')
-      .eq('workspace_id', wsUser.workspace_id)
+      .select('*, attachments(*)')
+      .eq('workspace_id', workspaceId)
       .order('due_date', { ascending: true, nullsFirst: false })
-    tasks = (data as Task[]) ?? []
+    tasks = (data as TaskWithAttachments[]) ?? []
   }
 
   return (
@@ -50,7 +52,7 @@ export default async function HomePage() {
         </form>
       </header>
 
-      <TaskList tasks={tasks} />
+      <TaskList tasks={tasks} workspaceId={workspaceId} />
     </main>
   )
 }

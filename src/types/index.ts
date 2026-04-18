@@ -13,10 +13,14 @@ export type Task = {
 export type Attachment = {
   id: string
   task_id: string
-  file_url: string
-  file_type: string
-  file_name: string
+  file_url: string  // storage path para archivos, URL directa para links
+  file_type: string // mime type para archivos, 'link' para enlaces externos
+  file_name: string // nombre del archivo o etiqueta del enlace
   created_at: string
+}
+
+export type TaskWithAttachments = Task & {
+  attachments: Attachment[]
 }
 
 export type Workspace = {
