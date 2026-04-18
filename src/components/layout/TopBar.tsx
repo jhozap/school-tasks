@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { logout } from '@/app/login/actions'
 import { ThemeToggle } from './ThemeToggle'
+import { NotificationBell } from './NotificationBell'
+import type { Reminder } from '@/types'
 
 interface Props {
   userEmail: string
@@ -10,6 +12,7 @@ interface Props {
   avatarUrl: string
   filter: string
   pendingCount: number
+  reminders: Reminder[]
 }
 
 function getInitials(name: string, email: string) {
@@ -24,11 +27,11 @@ function getInitials(name: string, email: string) {
   return local.slice(0, 2).toUpperCase()
 }
 
-export function TopBar({ userEmail, userName, avatarUrl, filter, pendingCount }: Props) {
+export function TopBar({ userEmail, userName, avatarUrl, filter, pendingCount, reminders }: Props) {
   const [open, setOpen] = useState(false)
   const initials = getInitials(userName, userEmail)
   const displayName = userName || userEmail
-  const title = filter === 'urgent' ? 'Urgente' : 'Dashboard'
+  const title = filter === 'urgent' ? 'Urgente' : filter === 'calendar' ? 'Calendario' : 'Dashboard'
 
   return (
     <header
@@ -49,6 +52,7 @@ export function TopBar({ userEmail, userName, avatarUrl, filter, pendingCount }:
 
       <div className="flex items-center gap-3">
         <ThemeToggle />
+        <NotificationBell reminders={reminders} />
 
         <div className="relative">
           <button

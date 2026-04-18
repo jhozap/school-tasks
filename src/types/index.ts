@@ -31,6 +31,16 @@ export type Workspace = {
   created_at: string
 }
 
+export type Reminder = {
+  id: string
+  workspace_id: string
+  created_by: string
+  title: string
+  notes: string | null
+  remind_at: string
+  created_at: string
+}
+
 export type WorkspaceInvitation = {
   id: string
   workspace_id: string
