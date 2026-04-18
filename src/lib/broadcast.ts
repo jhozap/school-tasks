@@ -12,7 +12,7 @@ export async function broadcastTaskChange(workspaceId: string) {
     },
     body: JSON.stringify({
       messages: [{
-        topic: `realtime:workspace:${workspaceId}`,
+        topic: `workspace:${workspaceId}`,
         event: 'task-change',
         payload: {},
       }],
