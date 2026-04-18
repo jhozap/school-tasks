@@ -1,22 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import { login } from './actions'
+import { useSearchParams } from 'next/navigation'
+import { register } from './actions'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next') ?? '/'
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError(null)
     const formData = new FormData(e.currentTarget)
-    const result = await login(formData)
+    formData.set('next', next)
+    const result = await register(formData)
     if (result?.error) {
       setError(result.error)
       setLoading(false)
@@ -31,18 +35,32 @@ export default function LoginPage() {
             School Tasks
           </h1>
           <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-inter)' }}>
-            Inicia sesión para ver las tareas
+            Crea tu cuenta para empezar
           </p>
         </div>
 
         <Card className="border-0 shadow-none bg-card rounded-2xl p-2">
           <CardHeader className="pb-4 pt-6 px-6">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest" style={{ fontFamily: 'var(--font-inter)' }}>
-              Acceso
+              Registro
             </p>
           </CardHeader>
           <CardContent className="px-6 pb-6">
             <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="workspace_name" className="text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: 'var(--font-inter)' }}>
+                  Nombre del workspace
+                </Label>
+                <Input
+                  id="workspace_name"
+                  name="workspace_name"
+                  type="text"
+                  placeholder="Mis tareas"
+                  className="bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary rounded-xl h-11"
+                  style={{ fontFamily: 'var(--font-inter)' }}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: 'var(--font-inter)' }}>
                   Correo
@@ -68,6 +86,7 @@ export default function LoginPage() {
                   type="password"
                   required
                   placeholder="••••••••"
+                  minLength={6}
                   className="bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary rounded-xl h-11"
                   style={{ fontFamily: 'var(--font-inter)' }}
                 />
@@ -88,16 +107,16 @@ export default function LoginPage() {
                   fontFamily: 'var(--font-inter)',
                 }}
               >
-                {loading ? 'Entrando...' : 'Entrar'}
+                {loading ? 'Creando cuenta...' : 'Crear cuenta'}
               </Button>
             </form>
           </CardContent>
         </Card>
 
         <p className="text-center text-xs text-muted-foreground" style={{ fontFamily: 'var(--font-inter)' }}>
-          ¿No tienes cuenta?{' '}
-          <a href="/register" className="text-primary font-medium hover:underline">
-            Regístrate
+          ¿Ya tienes cuenta?{' '}
+          <a href="/login" className="text-primary font-medium hover:underline">
+            Inicia sesión
           </a>
         </p>
       </div>

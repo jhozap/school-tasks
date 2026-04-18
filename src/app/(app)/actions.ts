@@ -2,36 +2,15 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-
-async function getWorkspaceId(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
-  const { data } = await supabase
-    .from('workspace_users')
-    .select('workspace_id')
-    .eq('user_id', userId)
-    .single()
-  return data?.workspace_id ?? null
-}
+import { getActiveWorkspaceId } from '@/lib/workspace'
 
 export async function createTask(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  let workspaceId = await getWorkspaceId(supabase, user.id)
-
-  if (!workspaceId) {
-    const { data: ws, error: wsError } = await supabase
-      .from('workspaces')
-      .insert({ name: 'Mi familia', created_by: user.id })
-      .select('id')
-      .single()
-    if (wsError || !ws) return { error: wsError?.message ?? 'Error creando workspace' }
-    workspaceId = ws.id
-    const { error: wuError } = await supabase
-      .from('workspace_users')
-      .insert({ workspace_id: workspaceId, user_id: user.id })
-    if (wuError) return { error: wuError.message }
-  }
+  const workspaceId = await getActiveWorkspaceId(supabase, user.id)
+  if (!workspaceId) return { error: 'Sin workspace activo' }
 
   const { error } = await supabase.from('tasks').insert({
     workspace_id: workspaceId,
