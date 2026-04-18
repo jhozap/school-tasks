@@ -9,6 +9,7 @@ import type { TaskWithAttachments } from '@/types'
 interface Props {
   task: TaskWithAttachments
   workspaceId: string
+  userId: string
 }
 
 function formatDate(dateStr: string) {
@@ -74,18 +75,20 @@ function StatusChip({ task }: { task: TaskWithAttachments }) {
   )
 }
 
-export function TaskCard({ task, workspaceId }: Props) {
+export function TaskCard({ task, workspaceId, userId }: Props) {
   const [editing, setEditing] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const isOwner = task.created_by === userId
 
   async function handleToggle() {
     await toggleTask(task.id, task.status)
   }
 
   async function handleDelete() {
-    if (!confirm('¿Eliminar esta tarea?')) return
     setDeleting(true)
     await deleteTask(task.id)
+    setConfirmDelete(false)
   }
 
   return (
@@ -146,23 +149,24 @@ export function TaskCard({ task, workspaceId }: Props) {
                   )}
                 </div>
 
-                <div className="flex gap-1 flex-shrink-0">
-                  <button
-                    onClick={() => setEditing(true)}
-                    className="w-7 h-7 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground text-xs transition-colors"
-                    aria-label="Editar"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="w-7 h-7 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:text-destructive text-xs transition-colors"
-                    aria-label="Eliminar"
-                  >
-                    🗑️
-                  </button>
-                </div>
+                {isOwner && (
+                  <div className="flex gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => setEditing(true)}
+                      className="w-7 h-7 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground text-xs transition-colors"
+                      aria-label="Editar"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      className="w-7 h-7 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:text-destructive text-xs transition-colors"
+                      aria-label="Eliminar"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                )}
               </div>
 
               <AttachmentPanel
@@ -176,6 +180,50 @@ export function TaskCard({ task, workspaceId }: Props) {
       </div>
 
       {editing && <TaskModal task={task} onClose={() => setEditing(false)} />}
+
+      {confirmDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          onClick={() => setConfirmDelete(false)}
+        >
+          <div className="absolute inset-0 bg-black/40" style={{ backdropFilter: 'blur(6px)' }} />
+          <div
+            className="relative w-full max-w-sm rounded-2xl p-6 space-y-4"
+            style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="space-y-1">
+              <h3 className="text-base font-bold" style={{ fontFamily: 'var(--font-manrope)' }}>
+                ¿Eliminar tarea?
+              </h3>
+              <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-inter)' }}>
+                <span className="font-medium" style={{ color: 'var(--foreground)' }}>{task.title}</span> será eliminada permanentemente.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 h-10 rounded-xl text-sm font-medium transition-colors hover:bg-muted"
+                style={{ fontFamily: 'var(--font-inter)', color: 'var(--muted-foreground)' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 h-10 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
+                style={{
+                  background: 'var(--destructive)',
+                  color: 'white',
+                  fontFamily: 'var(--font-inter)',
+                }}
+              >
+                {deleting ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

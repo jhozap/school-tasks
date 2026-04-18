@@ -9,6 +9,7 @@ interface Props {
   tasks: TaskWithAttachments[]
   workspaceId: string
   filter?: string
+  userId: string
 }
 
 function groupTasks(tasks: TaskWithAttachments[]) {
@@ -32,7 +33,7 @@ function groupTasks(tasks: TaskWithAttachments[]) {
   return { urgent, upcoming, noDue, completed }
 }
 
-function Section({ title, tasks, accent, workspaceId }: { title: string; tasks: TaskWithAttachments[]; accent: string; workspaceId: string }) {
+function Section({ title, tasks, accent, workspaceId, userId }: { title: string; tasks: TaskWithAttachments[]; accent: string; workspaceId: string; userId: string }) {
   if (tasks.length === 0) return null
   return (
     <div className="space-y-3">
@@ -42,12 +43,12 @@ function Section({ title, tasks, accent, workspaceId }: { title: string; tasks: 
       >
         {title}
       </p>
-      {tasks.map(task => <TaskCard key={task.id} task={task} workspaceId={workspaceId} />)}
+      {tasks.map(task => <TaskCard key={task.id} task={task} workspaceId={workspaceId} userId={userId} />)}
     </div>
   )
 }
 
-export function TaskList({ tasks, workspaceId, filter = 'all' }: Props) {
+export function TaskList({ tasks, workspaceId, filter = 'all', userId }: Props) {
   const [showModal, setShowModal] = useState(false)
   const { urgent, upcoming, noDue, completed } = groupTasks(tasks)
   const isEmpty = tasks.filter(t => t.status === 'pending').length === 0
@@ -78,10 +79,10 @@ export function TaskList({ tasks, workspaceId, filter = 'all' }: Props) {
           </div>
         )}
 
-        {showUrgent && <Section title="Urgente" tasks={urgent} accent="var(--destructive)" workspaceId={workspaceId} />}
-        {showUpcoming && <Section title="Próximas" tasks={upcoming} accent="var(--chart-4)" workspaceId={workspaceId} />}
-        {showNoDue && <Section title="Sin fecha" tasks={noDue} accent="var(--muted-foreground)" workspaceId={workspaceId} />}
-        {showCompleted && <Section title="Completadas" tasks={completed} accent="var(--chart-3)" workspaceId={workspaceId} />}
+        {showUrgent && <Section title="Urgente" tasks={urgent} accent="var(--destructive)" workspaceId={workspaceId} userId={userId} />}
+        {showUpcoming && <Section title="Próximas" tasks={upcoming} accent="var(--chart-4)" workspaceId={workspaceId} userId={userId} />}
+        {showNoDue && <Section title="Sin fecha" tasks={noDue} accent="var(--muted-foreground)" workspaceId={workspaceId} userId={userId} />}
+        {showCompleted && <Section title="Completadas" tasks={completed} accent="var(--chart-3)" workspaceId={workspaceId} userId={userId} />}
       </div>
 
       <button
