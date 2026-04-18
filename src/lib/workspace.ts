@@ -22,9 +22,7 @@ export async function getActiveWorkspaceId(
 
   if (!memberships?.length) return null
 
-  const id = memberships[0].workspace_id
-  cookieStore.set(COOKIE_NAME, id, { httpOnly: true, path: '/', sameSite: 'lax' })
-  return id
+  return memberships[0].workspace_id
 }
 
 export async function setActiveWorkspaceCookie(workspaceId: string) {
