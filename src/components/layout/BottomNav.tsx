@@ -3,6 +3,8 @@
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { logout } from '@/app/login/actions'
+import { TaskModal } from '@/components/tasks/TaskModal'
+import { ReminderModal } from '@/components/tasks/ReminderModal'
 import type { Workspace } from '@/types'
 
 function HomeIcon({ filled }: { filled?: boolean }) {
@@ -28,6 +30,17 @@ function UrgentIcon({ filled }: { filled?: boolean }) {
   )
 }
 
+function CalendarIcon({ filled }: { filled?: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  )
+}
+
 function ProfileIcon({ filled }: { filled?: boolean }) {
   return filled ? (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -45,27 +58,97 @@ interface Props {
   userEmail: string
   workspaces: Workspace[]
   activeWorkspaceId: string
+  remindersCount: number
 }
 
-export function BottomNav({ userEmail, workspaces, activeWorkspaceId }: Props) {
+export function BottomNav({ userEmail, workspaces, activeWorkspaceId, remindersCount }: Props) {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const filter = searchParams.get('filter') ?? 'all'
   const [showProfile, setShowProfile] = useState(false)
+  const [fabExpanded, setFabExpanded] = useState(false)
+  const [showTaskModal, setShowTaskModal] = useState(false)
+  const [showReminderModal, setShowReminderModal] = useState(false)
 
   const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId)
+  const isCalendar = pathname === '/calendar'
 
   function navigate(f: string) {
     router.push(`/?filter=${f}`)
   }
 
-  const tabs = [
+  function openTask() {
+    setFabExpanded(false)
+    setShowTaskModal(true)
+  }
+
+  function openReminder() {
+    setFabExpanded(false)
+    setShowReminderModal(true)
+  }
+
+  const leftTabs = [
     { id: 'all', label: 'Home', icon: HomeIcon },
     { id: 'urgent', label: 'Urgente', icon: UrgentIcon },
   ]
 
+  const rightTabs = [
+    { id: 'calendar', label: 'Calendario', icon: CalendarIcon },
+  ]
+
   return (
     <>
+      {/* FAB expanded overlay */}
+      {fabExpanded && (
+        <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setFabExpanded(false)}>
+          <div className="absolute inset-0 bg-black/20" style={{ backdropFilter: 'blur(4px)' }} />
+        </div>
+      )}
+
+      {/* FAB option bubbles */}
+      {fabExpanded && (
+        <div className="fixed bottom-20 left-0 right-0 z-50 lg:hidden flex justify-center gap-4 px-8">
+          <button
+            onClick={openTask}
+            className="flex flex-col items-center gap-1.5"
+          >
+            <span
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+              style={{
+                background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)',
+                color: 'var(--primary-foreground)',
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </span>
+            <span className="text-[10px] font-semibold" style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}>
+              Nueva tarea
+            </span>
+          </button>
+
+          <button
+            onClick={openReminder}
+            className="flex flex-col items-center gap-1.5"
+          >
+            <span
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+              style={{ background: 'var(--destructive)', color: '#fff' }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </span>
+            <span className="text-[10px] font-semibold" style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}>
+              Recordatorio
+            </span>
+          </button>
+        </div>
+      )}
+
       <nav
         className="fixed bottom-0 left-0 right-0 z-40 lg:hidden"
         style={{
@@ -75,8 +158,9 @@ export function BottomNav({ userEmail, workspaces, activeWorkspaceId }: Props) {
         }}
       >
         <div className="flex items-center max-w-2xl mx-auto">
-          {tabs.map(tab => {
-            const active = filter === tab.id
+          {/* Left tabs */}
+          {leftTabs.map(tab => {
+            const active = !isCalendar && filter === tab.id
             return (
               <button
                 key={tab.id}
@@ -90,6 +174,44 @@ export function BottomNav({ userEmail, workspaces, activeWorkspaceId }: Props) {
             )
           })}
 
+          {/* Center FAB */}
+          <div className="flex-1 flex justify-center">
+            <button
+              onClick={() => setFabExpanded(v => !v)}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md transition-all"
+              style={{
+                background: fabExpanded
+                  ? 'var(--muted-foreground)'
+                  : 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)',
+                color: 'var(--primary-foreground)',
+                transform: fabExpanded ? 'rotate(45deg)' : 'none',
+                transition: 'transform 0.2s, background 0.2s',
+              }}
+              aria-label="Crear nuevo"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Right tabs */}
+          {rightTabs.map(tab => {
+            const active = isCalendar
+            return (
+              <button
+                key={tab.id}
+                onClick={() => router.push('/calendar')}
+                className="flex-1 flex flex-col items-center gap-1 py-3 transition-colors"
+                style={{ color: active ? 'var(--primary)' : 'var(--muted-foreground)', fontFamily: 'var(--font-inter)' }}
+              >
+                <tab.icon filled={active} />
+                <span className="text-[10px] font-medium tracking-wide uppercase">{tab.label}</span>
+              </button>
+            )
+          })}
+
+          {/* Profile tab */}
           <button
             onClick={() => setShowProfile(true)}
             className="flex-1 flex flex-col items-center gap-1 py-3 transition-colors"
@@ -144,6 +266,9 @@ export function BottomNav({ userEmail, workspaces, activeWorkspaceId }: Props) {
           </div>
         </div>
       )}
+
+      {showTaskModal && <TaskModal onClose={() => setShowTaskModal(false)} />}
+      {showReminderModal && <ReminderModal onClose={() => setShowReminderModal(false)} />}
     </>
   )
 }

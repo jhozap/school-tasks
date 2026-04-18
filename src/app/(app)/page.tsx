@@ -1,17 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
-import { logout } from '@/app/login/actions'
-import { Button } from '@/components/ui/button'
 import { TaskList } from '@/components/tasks/TaskList'
 import { WorkspaceSwitcher } from '@/components/layout/WorkspaceSwitcher'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
+import { NotificationBell } from '@/components/layout/NotificationBell'
 import { RealtimeTaskSync } from '@/components/tasks/RealtimeTaskSync'
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { getActiveWorkspaceId } from '@/lib/workspace'
-import type { TaskWithAttachments, Workspace } from '@/types'
+import type { TaskWithAttachments, Workspace, Reminder } from '@/types'
 
 interface Props {
   searchParams: Promise<{ filter?: string }>
@@ -36,14 +35,23 @@ export default async function HomePage({ searchParams }: Props) {
   if (workspaces.length === 0) redirect('/onboarding')
 
   let tasks: TaskWithAttachments[] = []
+  let reminders: Reminder[] = []
 
   if (workspaceId) {
-    const { data } = await supabase
-      .from('tasks')
-      .select('*, attachments(*)')
-      .eq('workspace_id', workspaceId)
-      .order('due_date', { ascending: true, nullsFirst: false })
-    tasks = (data as TaskWithAttachments[]) ?? []
+    const [tasksRes, remindersRes] = await Promise.all([
+      supabase
+        .from('tasks')
+        .select('*, attachments(*)')
+        .eq('workspace_id', workspaceId)
+        .order('due_date', { ascending: true, nullsFirst: false }),
+      supabase
+        .from('reminders')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .order('remind_at', { ascending: true }),
+    ])
+    tasks = (tasksRes.data as TaskWithAttachments[]) ?? []
+    reminders = (remindersRes.data as Reminder[]) ?? []
   }
 
   const activeWorkspace = workspaces.find(w => w.id === workspaceId)
@@ -66,6 +74,7 @@ export default async function HomePage({ searchParams }: Props) {
             avatarUrl={user!.user_metadata?.avatar_url ?? user!.user_metadata?.picture ?? ''}
             filter={filter}
             pendingCount={tasks.filter(t => t.status === 'pending').length}
+            reminders={reminders}
           />
 
           <main className="flex-1 px-4 py-8 max-w-2xl mx-auto w-full pb-28 lg:pb-10">
@@ -87,6 +96,7 @@ export default async function HomePage({ searchParams }: Props) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                <NotificationBell reminders={reminders} />
                 <ThemeToggle />
               </div>
             </header>
@@ -102,6 +112,7 @@ export default async function HomePage({ searchParams }: Props) {
           userEmail={user!.email ?? ''}
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
+          remindersCount={reminders.length}
         />
       </Suspense>
     </>
