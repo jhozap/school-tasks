@@ -11,6 +11,7 @@ interface Props {
   attachments: Attachment[]
   taskId: string
   workspaceId: string
+  isOwner: boolean
 }
 
 interface ResolvedAttachment extends Attachment {
@@ -44,7 +45,7 @@ function PaperclipIcon() {
   )
 }
 
-export function AttachmentPanel({ attachments, taskId, workspaceId }: Props) {
+export function AttachmentPanel({ attachments, taskId, workspaceId, isOwner }: Props) {
   const [open, setOpen] = useState(false)
   const [resolved, setResolved] = useState<ResolvedAttachment[]>([])
   const [uploading, setUploading] = useState(false)
@@ -119,6 +120,8 @@ export function AttachmentPanel({ attachments, taskId, workspaceId }: Props) {
     await deleteAttachment(attachment.id, storagePath)
   }
 
+  if (!isOwner && attachments.length === 0) return null
+
   return (
     <div className="mt-3">
       <button
@@ -127,7 +130,11 @@ export function AttachmentPanel({ attachments, taskId, workspaceId }: Props) {
         style={{ fontFamily: 'var(--font-inter)' }}
       >
         <PaperclipIcon />
-        <span>{attachments.length > 0 ? `${attachments.length} adjunto${attachments.length > 1 ? 's' : ''}` : 'Adjuntar'}</span>
+        <span>
+          {attachments.length > 0
+            ? `${attachments.length} adjunto${attachments.length > 1 ? 's' : ''}`
+            : isOwner ? 'Adjuntar' : null}
+        </span>
         <span className="text-muted-foreground/50">{open ? '▲' : '▼'}</span>
       </button>
 
@@ -184,13 +191,17 @@ export function AttachmentPanel({ attachments, taskId, workspaceId }: Props) {
                   )}
                 </>
               )}
-              <button
-                onClick={() => handleDelete(a)}
-                className="text-muted-foreground hover:text-destructive text-xs flex-shrink-0 transition-colors"
-                aria-label="Eliminar adjunto"
-              >
-                ✕
-              </button>
+              {isOwner && (
+                <button
+                  onClick={() => handleDelete(a)}
+                  className="text-muted-foreground hover:text-destructive flex-shrink-0 transition-colors"
+                  aria-label="Eliminar adjunto"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
             </div>
           ))}
 
@@ -198,7 +209,7 @@ export function AttachmentPanel({ attachments, taskId, workspaceId }: Props) {
             <p className="text-xs text-destructive" style={{ fontFamily: 'var(--font-inter)' }}>{error}</p>
           )}
 
-          {showLinkForm ? (
+          {isOwner && showLinkForm ? (
             <form onSubmit={handleAddLink} className="space-y-2 bg-muted rounded-xl p-3">
               <input
                 type="url"
@@ -236,7 +247,7 @@ export function AttachmentPanel({ attachments, taskId, workspaceId }: Props) {
                 </button>
               </div>
             </form>
-          ) : (
+          ) : isOwner ? (
             <div className="flex gap-2 pt-1">
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -256,7 +267,7 @@ export function AttachmentPanel({ attachments, taskId, workspaceId }: Props) {
                 Enlace
               </button>
             </div>
-          )}
+          ) : null}
 
           <input
             ref={fileInputRef}
