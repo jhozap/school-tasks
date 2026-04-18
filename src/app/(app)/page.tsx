@@ -7,6 +7,7 @@ import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
+import { RealtimeTaskSync } from '@/components/tasks/RealtimeTaskSync'
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { getActiveWorkspaceId } from '@/lib/workspace'
@@ -90,6 +91,7 @@ export default async function HomePage({ searchParams }: Props) {
               </div>
             </header>
 
+            <RealtimeTaskSync workspaceId={workspaceId ?? ''} />
             <TaskList tasks={tasks} workspaceId={workspaceId ?? ''} filter={filter} />
           </main>
         </div>
