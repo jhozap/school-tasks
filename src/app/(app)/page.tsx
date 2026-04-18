@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUser } from '@/lib/auth'
 import { TaskList } from '@/components/tasks/TaskList'
 import { WorkspaceSwitcher } from '@/components/layout/WorkspaceSwitcher'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
@@ -18,41 +19,40 @@ interface Props {
 
 export default async function HomePage({ searchParams }: Props) {
   const { filter = 'all' } = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [user, supabase] = await Promise.all([getUser(), createClient()])
 
   const workspaceId = await getActiveWorkspaceId(supabase, user!.id)
 
-  const { data: wsData } = await supabase
-    .from('workspace_users')
-    .select('workspaces(*)')
-    .eq('user_id', user!.id)
+  // Fetch workspaces + content in parallel once we have the workspace id
+  const [wsData, tasksRes, remindersRes] = await Promise.all([
+    supabase
+      .from('workspace_users')
+      .select('workspaces(*)')
+      .eq('user_id', user!.id),
+    workspaceId
+      ? supabase
+          .from('tasks')
+          .select('*, attachments(*)')
+          .eq('workspace_id', workspaceId)
+          .order('due_date', { ascending: true, nullsFirst: false })
+      : Promise.resolve({ data: [] }),
+    workspaceId
+      ? supabase
+          .from('reminders')
+          .select('*')
+          .eq('workspace_id', workspaceId)
+          .order('remind_at', { ascending: true })
+      : Promise.resolve({ data: [] }),
+  ])
 
-  const workspaces: Workspace[] = (wsData ?? [])
-    .map(row => row.workspaces as unknown as Workspace)
+  const workspaces: Workspace[] = ((wsData.data ?? []) as { workspaces: unknown }[])
+    .map(row => row.workspaces as Workspace)
     .filter(Boolean)
 
   if (workspaces.length === 0) redirect('/onboarding')
 
-  let tasks: TaskWithAttachments[] = []
-  let reminders: Reminder[] = []
-
-  if (workspaceId) {
-    const [tasksRes, remindersRes] = await Promise.all([
-      supabase
-        .from('tasks')
-        .select('*, attachments(*)')
-        .eq('workspace_id', workspaceId)
-        .order('due_date', { ascending: true, nullsFirst: false }),
-      supabase
-        .from('reminders')
-        .select('*')
-        .eq('workspace_id', workspaceId)
-        .order('remind_at', { ascending: true }),
-    ])
-    tasks = (tasksRes.data as TaskWithAttachments[]) ?? []
-    reminders = (remindersRes.data as Reminder[]) ?? []
-  }
+  const tasks = (tasksRes.data as TaskWithAttachments[]) ?? []
+  const reminders = (remindersRes.data as Reminder[]) ?? []
 
   const activeWorkspace = workspaces.find(w => w.id === workspaceId)
   const isOwner = activeWorkspace?.created_by === user!.id

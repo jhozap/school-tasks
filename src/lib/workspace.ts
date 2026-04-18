@@ -10,18 +10,21 @@ export async function getActiveWorkspaceId(
   const cookieStore = await cookies()
   const cookieVal = cookieStore.get(COOKIE_NAME)?.value
 
+  // Trust the cookie — Supabase RLS rejects any invalid workspace_id anyway.
+  // Only hit the DB when there is no cookie yet.
+  if (cookieVal) return cookieVal
+
   const { data: memberships } = await supabase
     .from('workspace_users')
     .select('workspace_id')
     .eq('user_id', userId)
+    .limit(1)
 
-  if (!memberships || memberships.length === 0) return null
+  if (!memberships?.length) return null
 
-  const ids = memberships.map(m => m.workspace_id)
-
-  if (cookieVal && ids.includes(cookieVal)) return cookieVal
-
-  return ids[0]
+  const id = memberships[0].workspace_id
+  cookieStore.set(COOKIE_NAME, id, { httpOnly: true, path: '/', sameSite: 'lax' })
+  return id
 }
 
 export async function setActiveWorkspaceCookie(workspaceId: string) {

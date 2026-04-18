@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -9,33 +10,28 @@ import { Suspense } from 'react'
 import type { Task, Reminder, Workspace } from '@/types'
 
 export default async function CalendarPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [user, supabase] = await Promise.all([getUser(), createClient()])
 
   const workspaceId = await getActiveWorkspaceId(supabase, user!.id)
 
-  const { data: wsData } = await supabase
-    .from('workspace_users')
-    .select('workspaces(*)')
-    .eq('user_id', user!.id)
+  const [wsData, tasksRes, remindersRes] = await Promise.all([
+    supabase.from('workspace_users').select('workspaces(*)').eq('user_id', user!.id),
+    workspaceId
+      ? supabase.from('tasks').select('*').eq('workspace_id', workspaceId)
+      : Promise.resolve({ data: [] }),
+    workspaceId
+      ? supabase.from('reminders').select('*').eq('workspace_id', workspaceId)
+      : Promise.resolve({ data: [] }),
+  ])
 
-  const workspaces: Workspace[] = (wsData ?? [])
-    .map(row => row.workspaces as unknown as Workspace)
+  const workspaces: Workspace[] = ((wsData.data ?? []) as { workspaces: unknown }[])
+    .map(row => row.workspaces as Workspace)
     .filter(Boolean)
 
   if (workspaces.length === 0) redirect('/onboarding')
 
-  let tasks: Task[] = []
-  let reminders: Reminder[] = []
-
-  if (workspaceId) {
-    const [tasksRes, remindersRes] = await Promise.all([
-      supabase.from('tasks').select('*').eq('workspace_id', workspaceId),
-      supabase.from('reminders').select('*').eq('workspace_id', workspaceId),
-    ])
-    tasks = tasksRes.data ?? []
-    reminders = remindersRes.data ?? []
-  }
+  const tasks = (tasksRes.data as Task[]) ?? []
+  const reminders = (remindersRes.data as Reminder[]) ?? []
 
   const activeWorkspace = workspaces.find(w => w.id === workspaceId)
   const isOwner = activeWorkspace?.created_by === user!.id
