@@ -5,8 +5,6 @@ import { TaskCard } from './TaskCard'
 import { TaskModal } from './TaskModal'
 import type { TaskWithAttachments } from '@/types'
 
-const ORANGE = 'oklch(0.72 0.19 47)'
-
 interface Props {
   tasks: TaskWithAttachments[]
   workspaceId: string
@@ -20,46 +18,21 @@ function getDiff(dueDateStr: string) {
   return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-// Returns the Sunday of the current calendar week (Mon–Sun)
-function getThisSunday() {
-  const d = new Date(); d.setHours(0, 0, 0, 0)
-  const day = d.getDay() // 0=Sun, 1=Mon … 6=Sat
-  const daysToSunday = day === 0 ? 0 : 7 - day
-  d.setDate(d.getDate() + daysToSunday)
-  return d
-}
-
 function groupTasks(tasks: TaskWithAttachments[]) {
-  const overdue: TaskWithAttachments[] = []
-  const today: TaskWithAttachments[] = []
-  const tomorrow: TaskWithAttachments[] = []
-  const thisWeek: TaskWithAttachments[] = []
+  const urgent: TaskWithAttachments[] = []
   const upcoming: TaskWithAttachments[] = []
-  const noDue: TaskWithAttachments[] = []
   const completed: TaskWithAttachments[] = []
-
-  const thisSunday = getThisSunday()
 
   for (const task of tasks) {
     if (task.status === 'completed') { completed.push(task); continue }
-    if (!task.due_date) { noDue.push(task); continue }
+    if (!task.due_date) { upcoming.push(task); continue }
 
     const diff = getDiff(task.due_date)
-    if (diff < 0) {
-      overdue.push(task)
-    } else if (diff === 0) {
-      today.push(task)
-    } else if (diff === 1) {
-      tomorrow.push(task)
-    } else {
-      // "Esta semana" = day after tomorrow through end of this Sunday
-      const dueDay = new Date(task.due_date + 'T00:00:00')
-      if (dueDay <= thisSunday) thisWeek.push(task)
-      else upcoming.push(task)
-    }
+    if (diff <= 1) urgent.push(task)
+    else upcoming.push(task)
   }
 
-  return { overdue, today, tomorrow, thisWeek, upcoming, noDue, completed }
+  return { urgent, upcoming, completed }
 }
 
 function Section({
@@ -80,15 +53,14 @@ function Section({
 
 export function TaskList({ tasks, workspaceId, filter = 'all', userId }: Props) {
   const [showModal, setShowModal] = useState(false)
-  const { overdue, today, tomorrow, thisWeek, upcoming, noDue, completed } = groupTasks(tasks)
+  const { urgent, upcoming, completed } = groupTasks(tasks)
 
-  const urgentTasks = [...overdue, ...today, ...tomorrow]
   const isUrgentFilter = filter === 'urgent'
   const isAll = filter === 'all'
 
   const filteredEmpty = isUrgentFilter
-    ? urgentTasks.length === 0
-    : tasks.filter(t => t.status === 'pending').length === 0 && completed.length === 0
+    ? urgent.length === 0
+    : tasks.length === 0
 
   return (
     <>
@@ -109,12 +81,8 @@ export function TaskList({ tasks, workspaceId, filter = 'all', userId }: Props) 
           </div>
         )}
 
-        {(isAll || isUrgentFilter) && <Section title="Urgentes" tasks={overdue} accent="var(--destructive)" workspaceId={workspaceId} userId={userId} />}
-        {(isAll || isUrgentFilter) && <Section title="Hoy" tasks={today} accent="var(--destructive)" workspaceId={workspaceId} userId={userId} />}
-        {(isAll || isUrgentFilter) && <Section title="Mañana" tasks={tomorrow} accent={ORANGE} workspaceId={workspaceId} userId={userId} />}
-        {isAll && <Section title="Esta semana" tasks={thisWeek} accent="var(--chart-4)" workspaceId={workspaceId} userId={userId} />}
+        {(isAll || isUrgentFilter) && <Section title="Urgentes" tasks={urgent} accent="var(--destructive)" workspaceId={workspaceId} userId={userId} />}
         {isAll && <Section title="Próximas" tasks={upcoming} accent="var(--chart-2)" workspaceId={workspaceId} userId={userId} />}
-        {isAll && <Section title="Sin fecha" tasks={noDue} accent="var(--muted-foreground)" workspaceId={workspaceId} userId={userId} />}
         {isAll && <Section title="Completadas" tasks={completed} accent="var(--chart-3)" workspaceId={workspaceId} userId={userId} />}
       </div>
 
