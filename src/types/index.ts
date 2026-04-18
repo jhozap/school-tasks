@@ -29,3 +29,12 @@ export type Workspace = {
   created_by: string
   created_at: string
 }
+
+export type WorkspaceInvitation = {
+  id: string
+  workspace_id: string
+  token: string
+  expires_at: string
+  used_at: string | null
+  created_at: string
+}
