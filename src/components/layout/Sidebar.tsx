@@ -2,9 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { logout } from '@/app/login/actions'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
-import { ThemeToggle } from './ThemeToggle'
 import { TaskModal } from '@/components/tasks/TaskModal'
 import type { Workspace } from '@/types'
 
@@ -29,15 +27,6 @@ function UrgentIcon({ filled }: { filled?: boolean }) {
   )
 }
 
-function LogoutIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  )
-}
 
 interface Props {
   workspaces: Workspace[]
@@ -115,19 +104,6 @@ export function Sidebar({ workspaces, activeWorkspaceId, isOwner, filter }: Prop
             Nueva tarea
           </button>
 
-          <div className="flex items-center gap-2 px-1">
-            <ThemeToggle />
-            <form action={logout} className="flex-1">
-              <button
-                type="submit"
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                style={{ fontFamily: 'var(--font-inter)' }}
-              >
-                <LogoutIcon />
-                Cerrar sesión
-              </button>
-            </form>
-          </div>
         </div>
       </aside>
 
