@@ -11,14 +11,14 @@ interface Props {
   userId: string
 }
 
+const ORANGE = 'oklch(0.72 0.19 47)'
+
 function formatDate(dateStr: string) {
-  const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' })
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
 function getDiffDays(dueDateStr: string) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const today = new Date(); today.setHours(0, 0, 0, 0)
   const due = new Date(dueDateStr + 'T00:00:00')
   return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 }
@@ -26,11 +26,10 @@ function getDiffDays(dueDateStr: string) {
 function getAccentColor(task: TaskWithAttachments) {
   if (task.status === 'completed') return 'var(--chart-3)'
   if (!task.due_date) return 'var(--muted-foreground)'
-  const diff = getDiffDays(task.due_date)
-  if (diff < 0) return 'var(--destructive)'
-  if (diff === 0) return 'var(--destructive)'
-  if (diff <= 1) return 'var(--chart-4)'
-  if (diff <= 7) return 'var(--chart-4)'
+  const d = getDiffDays(task.due_date)
+  if (d < 0 || d === 0) return 'var(--destructive)'
+  if (d === 1) return ORANGE
+  if (d <= 7) return 'var(--chart-4)'
   return 'var(--chart-2)'
 }
 
@@ -45,20 +44,18 @@ function CheckIcon() {
 }
 
 function StatusChip({ task }: { task: TaskWithAttachments }) {
-  if (task.status === 'completed') {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-        style={{ background: 'oklch(from var(--chart-3) l c h / 0.15)', color: 'var(--chart-3)', fontFamily: 'var(--font-inter)' }}>
-        <CheckIcon /> Completado
-      </span>
-    )
-  }
+  if (task.status === 'completed') return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+      style={{ background: 'oklch(from var(--chart-3) l c h / 0.15)', color: 'var(--chart-3)', fontFamily: 'var(--font-inter)' }}>
+      <CheckIcon /> Completado
+    </span>
+  )
   if (!task.due_date) return null
   const diff = getDiffDays(task.due_date)
   if (diff < 0) return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
       style={{ background: 'oklch(from var(--destructive) l c h / 0.15)', color: 'var(--destructive)', fontFamily: 'var(--font-inter)' }}>
-      <AlertIcon /> Vencida
+      <AlertIcon /> Urgente
     </span>
   )
   if (diff === 0) return (
@@ -69,7 +66,7 @@ function StatusChip({ task }: { task: TaskWithAttachments }) {
   )
   if (diff === 1) return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-      style={{ background: 'oklch(from var(--chart-4) l c h / 0.15)', color: 'var(--chart-4)', fontFamily: 'var(--font-inter)' }}>
+      style={{ background: `oklch(from ${ORANGE} l c h / 0.15)`, color: ORANGE, fontFamily: 'var(--font-inter)' }}>
       <ClockIcon /> Mañana
     </span>
   )
@@ -94,20 +91,20 @@ function AttachmentBadges({ attachments }: { attachments: TaskWithAttachments['a
   const files = attachments.filter(a => !a.file_type.startsWith('image/') && a.file_type !== 'link')
 
   return (
-    <div className="flex items-center gap-2 mt-2">
+    <div className="flex items-center gap-1.5">
       {images.length > 0 && (
-        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md"
           style={{ background: 'var(--muted)', color: 'var(--muted-foreground)', fontFamily: 'var(--font-inter)' }}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
           </svg>
           {images.length}
         </span>
       )}
       {links.length > 0 && (
-        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md"
           style={{ background: 'var(--muted)', color: 'var(--muted-foreground)', fontFamily: 'var(--font-inter)' }}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
@@ -115,9 +112,9 @@ function AttachmentBadges({ attachments }: { attachments: TaskWithAttachments['a
         </span>
       )}
       {files.length > 0 && (
-        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md"
           style={{ background: 'var(--muted)', color: 'var(--muted-foreground)', fontFamily: 'var(--font-inter)' }}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14,2 14,8 20,8" />
           </svg>
           {files.length}
@@ -150,21 +147,24 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
     setMenuOpen(v => !v)
   }
 
+  const accentColor = getAccentColor(task)
+
   return (
     <>
       <div
-        className="bg-card rounded-2xl flex overflow-hidden cursor-pointer group"
+        className="bg-card rounded-2xl flex overflow-hidden cursor-pointer group transition-shadow hover:shadow-md"
         style={{ boxShadow: '0 2px 16px oklch(0.05 0 0 / 8%)' }}
         onClick={() => router.push(`/tasks/${task.id}`)}
       >
-        <div className="w-1 flex-shrink-0 rounded-l-2xl" style={{ background: getAccentColor(task) }} />
+        {/* Accent bar */}
+        <div className="w-1 flex-shrink-0 rounded-l-2xl" style={{ background: accentColor }} />
 
         <div className="flex-1 px-4 py-3.5 min-w-0">
-          <div className="flex items-start gap-3">
+          <div className="flex items-center gap-3">
             {/* Checkbox */}
             <button
               onClick={handleToggle}
-              className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
+              className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
               style={{
                 borderColor: task.status === 'completed' ? 'var(--chart-3)' : 'var(--border)',
                 background: task.status === 'completed' ? 'var(--chart-3)' : 'transparent',
@@ -178,100 +178,99 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
               )}
             </button>
 
-            {/* Body */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <StatusChip task={task} />
-                  </div>
-                  <p
-                    className="text-sm font-semibold leading-snug"
-                    style={{
-                      fontFamily: 'var(--font-inter)',
-                      textDecoration: task.status === 'completed' ? 'line-through' : 'none',
-                      color: task.status === 'completed' ? 'var(--muted-foreground)' : 'inherit',
-                    }}
-                  >
-                    {task.title}
+            {/* Content — stacked on mobile, horizontal on desktop */}
+            <div className="flex-1 min-w-0 flex flex-col lg:flex-row lg:items-center lg:gap-4">
+              {/* Left: title + description */}
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-sm font-semibold leading-snug truncate"
+                  style={{
+                    fontFamily: 'var(--font-inter)',
+                    textDecoration: task.status === 'completed' ? 'line-through' : 'none',
+                    color: task.status === 'completed' ? 'var(--muted-foreground)' : 'inherit',
+                  }}
+                >
+                  {task.title}
+                </p>
+                {task.description && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1" style={{ fontFamily: 'var(--font-inter)' }}>
+                    {task.description}
                   </p>
-                  {task.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-1" style={{ fontFamily: 'var(--font-inter)' }}>
-                      {task.description}
-                    </p>
-                  )}
-                  {task.due_date && (
-                    <div className="flex items-center gap-1">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted-foreground)', flexShrink: 0 }}>
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                      <p className="text-xs font-medium" style={{ fontFamily: 'var(--font-inter)', color: getAccentColor(task) }}>
-                        {formatDate(task.due_date)}
-                      </p>
-                    </div>
-                  )}
-                  <AttachmentBadges attachments={task.attachments} />
-                </div>
-
-                {/* Owner three-dot menu */}
-                {isOwner && (
-                  <div className="relative flex-shrink-0">
-                    <button
-                      onClick={openMenu}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 hover:bg-muted"
-                      style={{ color: 'var(--muted-foreground)' }}
-                      aria-label="Opciones"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-                      </svg>
-                    </button>
-
-                    {menuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-40" onClick={e => { e.stopPropagation(); setMenuOpen(false) }} />
-                        <div
-                          className="absolute right-0 top-full mt-1 w-36 rounded-xl z-50 overflow-hidden shadow-lg"
-                          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <button
-                            onClick={e => { e.stopPropagation(); setMenuOpen(false); router.push(`/tasks/${task.id}?edit=true`) }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
-                            style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}
-                          >
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                            </svg>
-                            Editar
-                          </button>
-                          <button
-                            onClick={e => { e.stopPropagation(); setMenuOpen(false); setConfirmDelete(true) }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
-                            style={{ fontFamily: 'var(--font-inter)', color: 'var(--destructive)' }}
-                          >
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" />
-                            </svg>
-                            Eliminar
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
                 )}
               </div>
+
+              {/* Right: status chip + date + attachment badges */}
+              <div className="flex items-center gap-2 mt-1.5 lg:mt-0 lg:flex-shrink-0 flex-wrap">
+                <StatusChip task={task} />
+                {task.due_date && (
+                  <span
+                    className="inline-flex items-center gap-1 text-[11px] font-medium"
+                    style={{ fontFamily: 'var(--font-inter)', color: accentColor }}
+                  >
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    {formatDate(task.due_date)}
+                  </span>
+                )}
+                <AttachmentBadges attachments={task.attachments} />
+              </div>
             </div>
+
+            {/* Owner three-dot menu */}
+            {isOwner && (
+              <div className="relative flex-shrink-0">
+                <button
+                  onClick={openMenu}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 hover:bg-muted"
+                  style={{ color: 'var(--muted-foreground)' }}
+                  aria-label="Opciones"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
+                  </svg>
+                </button>
+
+                {menuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={e => { e.stopPropagation(); setMenuOpen(false) }} />
+                    <div
+                      className="absolute right-0 top-full mt-1 w-36 rounded-xl z-50 overflow-hidden shadow-lg"
+                      style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={e => { e.stopPropagation(); setMenuOpen(false); router.push(`/tasks/${task.id}?edit=true`) }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
+                        style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        Editar
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); setMenuOpen(false); setConfirmDelete(true) }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
+                        style={{ fontFamily: 'var(--font-inter)', color: 'var(--destructive)' }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" />
+                        </svg>
+                        Eliminar
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {confirmDelete && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          onClick={() => setConfirmDelete(false)}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setConfirmDelete(false)}>
           <div className="absolute inset-0 bg-black/40" style={{ backdropFilter: 'blur(6px)' }} />
           <div
             className="relative w-full max-w-sm rounded-2xl p-6 space-y-4"
@@ -279,9 +278,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
             onClick={e => e.stopPropagation()}
           >
             <div className="space-y-1">
-              <h3 className="text-base font-bold" style={{ fontFamily: 'var(--font-manrope)' }}>
-                ¿Eliminar tarea?
-              </h3>
+              <h3 className="text-base font-bold" style={{ fontFamily: 'var(--font-manrope)' }}>¿Eliminar tarea?</h3>
               <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-inter)' }}>
                 <span className="font-medium" style={{ color: 'var(--foreground)' }}>{task.title}</span> será eliminada permanentemente.
               </p>

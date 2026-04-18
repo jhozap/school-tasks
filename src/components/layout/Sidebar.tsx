@@ -39,6 +39,15 @@ function CalendarIcon({ filled }: { filled?: boolean }) {
   )
 }
 
+function BellIcon({ filled }: { filled?: boolean }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  )
+}
+
 interface Props {
   workspaces: Workspace[]
   activeWorkspaceId: string
@@ -53,19 +62,19 @@ export function Sidebar({ workspaces, activeWorkspaceId, isOwner, filter }: Prop
   const [createExpanded, setCreateExpanded] = useState(false)
 
   const isCalendar = filter === 'calendar'
+  const isReminders = filter === 'reminders'
 
   const navItems = [
     { id: 'all', label: 'Dashboard', Icon: DashboardIcon },
     { id: 'urgent', label: 'Urgente', Icon: UrgentIcon },
     { id: 'calendar', label: 'Calendario', Icon: CalendarIcon },
+    { id: 'reminders', label: 'Recordatorios', Icon: BellIcon },
   ]
 
   function handleNavClick(id: string) {
-    if (id === 'calendar') {
-      router.push('/calendar')
-    } else {
-      router.push(`/?filter=${id}`)
-    }
+    if (id === 'calendar') router.push('/calendar')
+    else if (id === 'reminders') router.push('/reminders')
+    else router.push(`/?filter=${id}`)
   }
 
   function openTask() {
@@ -103,7 +112,7 @@ export function Sidebar({ workspaces, activeWorkspaceId, isOwner, filter }: Prop
         {/* Nav */}
         <nav className="flex-1 px-3 space-y-0.5">
           {navItems.map(({ id, label, Icon }) => {
-            const active = id === 'calendar' ? isCalendar : filter === id && !isCalendar
+            const active = id === 'calendar' ? isCalendar : id === 'reminders' ? isReminders : filter === id && !isCalendar && !isReminders
             return (
               <button
                 key={id}

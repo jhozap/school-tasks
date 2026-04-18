@@ -31,7 +31,7 @@ export function TopBar({ userEmail, userName, avatarUrl, filter, pendingCount, r
   const [open, setOpen] = useState(false)
   const initials = getInitials(userName, userEmail)
   const displayName = userName || userEmail
-  const title = filter === 'urgent' ? 'Urgente' : filter === 'calendar' ? 'Calendario' : 'Dashboard'
+  const title = filter === 'urgent' ? 'Urgente' : filter === 'calendar' ? 'Calendario' : filter === 'reminders' ? 'Recordatorios' : 'Dashboard'
 
   return (
     <header
