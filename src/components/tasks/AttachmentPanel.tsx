@@ -229,8 +229,8 @@ export function AttachmentPanel({ attachments, taskId, workspaceId }: Props) {
                 <button
                   type="submit"
                   disabled={linkLoading}
-                  className="flex-1 text-xs py-1.5 rounded-lg text-white font-medium"
-                  style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)', fontFamily: 'var(--font-inter)' }}
+                  className="flex-1 text-xs py-1.5 rounded-lg font-medium"
+                  style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)', color: 'var(--primary-foreground)', fontFamily: 'var(--font-inter)' }}
                 >
                   {linkLoading ? '...' : 'Guardar'}
                 </button>
