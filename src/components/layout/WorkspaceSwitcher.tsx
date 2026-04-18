@@ -156,8 +156,8 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Pr
                   <button
                     type="submit"
                     disabled={creating}
-                    className="flex-1 text-xs py-1.5 rounded-lg text-white font-medium"
-                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)', fontFamily: 'var(--font-inter)' }}
+                    className="flex-1 text-xs py-1.5 rounded-lg font-medium"
+                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)', color: 'var(--primary-foreground)', fontFamily: 'var(--font-inter)' }}
                   >
                     {creating ? '...' : 'Crear'}
                   </button>

@@ -94,7 +94,7 @@
   --popover-foreground: oklch(0.915 0.005 60);
   /* Green primary "The Growth" */
   --primary: oklch(0.82 0.18 142);
-  --primary-foreground: oklch(0.22 0.08 142);
+  --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.175 0.003 40);
   --secondary-foreground: oklch(0.915 0.005 60);
   --muted: oklch(0.175 0.003 40);
