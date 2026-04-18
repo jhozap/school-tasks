@@ -13,37 +13,33 @@ export async function addAttachmentRecord(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { error } = await supabase.from('attachments').insert({
-    task_id: taskId,
-    file_url: storagePath,
-    file_type: fileType,
-    file_name: fileName,
-  })
+  const { data, error } = await supabase
+    .from('attachments')
+    .insert({ task_id: taskId, file_url: storagePath, file_type: fileType, file_name: fileName })
+    .select('id')
+    .single()
 
   if (error) return { error: error.message }
   revalidatePath('/')
+  return { id: data.id as string }
 }
 
 export async function addLinkAttachment(taskId: string, url: string, label: string) {
-  try {
-    new URL(url)
-  } catch {
-    return { error: 'URL inválida' }
-  }
+  try { new URL(url) } catch { return { error: 'URL inválida' } }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { error } = await supabase.from('attachments').insert({
-    task_id: taskId,
-    file_url: url,
-    file_type: 'link',
-    file_name: label || url,
-  })
+  const { data, error } = await supabase
+    .from('attachments')
+    .insert({ task_id: taskId, file_url: url, file_type: 'link', file_name: label || url })
+    .select('id')
+    .single()
 
   if (error) return { error: error.message }
   revalidatePath('/')
+  return { id: data.id as string }
 }
 
 export async function deleteAttachment(attachmentId: string, storagePath: string | null) {

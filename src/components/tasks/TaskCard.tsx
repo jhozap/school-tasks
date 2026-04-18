@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toggleTask, deleteTask } from '@/app/(app)/actions'
-import { TaskModal } from './TaskModal'
 import type { TaskWithAttachments } from '@/types'
 
 interface Props {
@@ -130,7 +129,6 @@ function AttachmentBadges({ attachments }: { attachments: TaskWithAttachments['a
 
 export function TaskCard({ task, workspaceId, userId }: Props) {
   const router = useRouter()
-  const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -238,7 +236,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
                           onClick={e => e.stopPropagation()}
                         >
                           <button
-                            onClick={e => { e.stopPropagation(); setMenuOpen(false); setEditing(true) }}
+                            onClick={e => { e.stopPropagation(); setMenuOpen(false); router.push(`/tasks/${task.id}?edit=true`) }}
                             className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
                             style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}
                           >
@@ -268,8 +266,6 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
           </div>
         </div>
       </div>
-
-      {editing && <TaskModal task={task} onClose={() => setEditing(false)} />}
 
       {confirmDelete && (
         <div
