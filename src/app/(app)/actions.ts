@@ -23,7 +23,7 @@ export async function createTask(formData: FormData) {
 
   if (error) return { error: error.message }
   revalidatePath('/')
-  await broadcastTaskChange(workspaceId)
+  void broadcastTaskChange(workspaceId)
 }
 
 export async function updateTask(id: string, formData: FormData) {
@@ -41,7 +41,7 @@ export async function updateTask(id: string, formData: FormData) {
 
   if (error) return { error: error.message }
   revalidatePath('/')
-  if (workspaceId) await broadcastTaskChange(workspaceId)
+  if (workspaceId) void broadcastTaskChange(workspaceId)
 }
 
 export async function toggleTask(id: string, status: 'pending' | 'completed') {
@@ -58,7 +58,7 @@ export async function toggleTask(id: string, status: 'pending' | 'completed') {
 
   if (error) return { error: error.message }
   revalidatePath('/')
-  if (workspaceId) await broadcastTaskChange(workspaceId)
+  if (workspaceId) void broadcastTaskChange(workspaceId)
 }
 
 export async function deleteTask(id: string) {
@@ -71,5 +71,5 @@ export async function deleteTask(id: string) {
   const { error } = await supabase.from('tasks').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/')
-  if (workspaceId) await broadcastTaskChange(workspaceId)
+  if (workspaceId) void broadcastTaskChange(workspaceId)
 }
