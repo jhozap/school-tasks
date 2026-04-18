@@ -180,15 +180,26 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Pr
                   <p className="text-xs text-muted-foreground px-2" style={{ fontFamily: 'var(--font-inter)' }}>
                     Enlace de invitación (7 días):
                   </p>
-                  <div className="flex items-center gap-1.5 bg-muted rounded-xl px-3 py-2">
-                    <span className="flex-1 text-xs text-muted-foreground truncate" style={{ fontFamily: 'var(--font-inter)' }}>
-                      {inviteUrl}
-                    </span>
-                    <button onClick={handleCopy} className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors">
-                      <CopyIcon />
-                    </button>
-                  </div>
-                  {copied && <p className="text-xs text-center" style={{ color: 'var(--chart-3)', fontFamily: 'var(--font-inter)' }}>¡Copiado!</p>}
+                  <input
+                    type="text"
+                    readOnly
+                    value={inviteUrl}
+                    onClick={e => (e.target as HTMLInputElement).select()}
+                    className="w-full bg-muted rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary cursor-text"
+                    style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--muted-foreground)', border: 'none' }}
+                  />
+                  <button
+                    onClick={handleCopy}
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-medium transition-colors"
+                    style={{
+                      background: copied ? 'oklch(from var(--chart-3) l c h / 0.15)' : 'oklch(from var(--primary) l c h / 0.12)',
+                      color: copied ? 'var(--chart-3)' : 'var(--primary)',
+                      fontFamily: 'var(--font-inter)',
+                    }}
+                  >
+                    <CopyIcon />
+                    {copied ? '¡Copiado!' : 'Copiar enlace'}
+                  </button>
                 </div>
               ) : (
                 <button

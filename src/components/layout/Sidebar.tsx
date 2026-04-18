@@ -81,7 +81,7 @@ export function Sidebar({ workspaces, activeWorkspaceId, isOwner, filter }: Prop
   return (
     <>
       <aside
-        className="hidden lg:flex flex-col w-56 flex-shrink-0 h-screen sticky top-0 overflow-y-auto"
+        className="hidden lg:flex flex-col w-72 flex-shrink-0 h-screen sticky top-0 overflow-y-auto"
         style={{ background: 'var(--card)', borderRight: '1px solid var(--border)' }}
       >
         {/* Brand */}
