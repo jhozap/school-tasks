@@ -19,27 +19,11 @@ export function RealtimeTaskSync({ workspaceId }: Props) {
     const supabase = createClient()
 
     const channel = supabase
-      .channel(`tasks:workspace:${workspaceId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'tasks',
-        },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as { workspace_id?: string } | null
-          if (!row || row.workspace_id === workspaceId) {
-            routerRef.current.refresh()
-          }
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR') {
-          // retry after brief delay
-          setTimeout(() => supabase.removeChannel(channel), 2000)
-        }
+      .channel(`workspace:${workspaceId}`)
+      .on('broadcast', { event: 'task-change' }, () => {
+        routerRef.current.refresh()
       })
+      .subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [workspaceId])
