@@ -5,6 +5,8 @@ import { TaskCard } from './TaskCard'
 import { TaskModal } from './TaskModal'
 import type { TaskWithAttachments } from '@/types'
 
+const ORANGE = 'oklch(0.72 0.19 47)'
+
 interface Props {
   tasks: TaskWithAttachments[]
   workspaceId: string
@@ -13,10 +15,18 @@ interface Props {
 }
 
 function getDiff(dueDateStr: string) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const today = new Date(); today.setHours(0, 0, 0, 0)
   const due = new Date(dueDateStr + 'T00:00:00')
   return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+// Returns the Sunday of the current calendar week (Mon–Sun)
+function getThisSunday() {
+  const d = new Date(); d.setHours(0, 0, 0, 0)
+  const day = d.getDay() // 0=Sun, 1=Mon … 6=Sat
+  const daysToSunday = day === 0 ? 0 : 7 - day
+  d.setDate(d.getDate() + daysToSunday)
+  return d
 }
 
 function groupTasks(tasks: TaskWithAttachments[]) {
@@ -28,28 +38,39 @@ function groupTasks(tasks: TaskWithAttachments[]) {
   const noDue: TaskWithAttachments[] = []
   const completed: TaskWithAttachments[] = []
 
+  const thisSunday = getThisSunday()
+
   for (const task of tasks) {
     if (task.status === 'completed') { completed.push(task); continue }
     if (!task.due_date) { noDue.push(task); continue }
+
     const diff = getDiff(task.due_date)
-    if (diff < 0)       overdue.push(task)
-    else if (diff === 0) today.push(task)
-    else if (diff === 1) tomorrow.push(task)
-    else if (diff <= 7)  thisWeek.push(task)
-    else                 upcoming.push(task)
+    if (diff < 0) {
+      overdue.push(task)
+    } else if (diff === 0) {
+      today.push(task)
+    } else if (diff === 1) {
+      tomorrow.push(task)
+    } else {
+      // "Esta semana" = day after tomorrow through end of this Sunday
+      const dueDay = new Date(task.due_date + 'T00:00:00')
+      if (dueDay <= thisSunday) thisWeek.push(task)
+      else upcoming.push(task)
+    }
   }
 
   return { overdue, today, tomorrow, thisWeek, upcoming, noDue, completed }
 }
 
-function Section({ title, tasks, accent, workspaceId, userId }: { title: string; tasks: TaskWithAttachments[]; accent: string; workspaceId: string; userId: string }) {
+function Section({
+  title, tasks, accent, workspaceId, userId,
+}: {
+  title: string; tasks: TaskWithAttachments[]; accent: string; workspaceId: string; userId: string
+}) {
   if (tasks.length === 0) return null
   return (
     <div className="space-y-3">
-      <p
-        className="text-xs font-semibold uppercase tracking-widest"
-        style={{ fontFamily: 'var(--font-inter)', color: accent }}
-      >
+      <p className="text-xs font-semibold uppercase tracking-widest" style={{ fontFamily: 'var(--font-inter)', color: accent }}>
         {title}
       </p>
       {tasks.map(task => <TaskCard key={task.id} task={task} workspaceId={workspaceId} userId={userId} />)}
@@ -88,9 +109,9 @@ export function TaskList({ tasks, workspaceId, filter = 'all', userId }: Props) 
           </div>
         )}
 
-        {(isAll || isUrgentFilter) && <Section title="Vencidas" tasks={overdue} accent="var(--destructive)" workspaceId={workspaceId} userId={userId} />}
+        {(isAll || isUrgentFilter) && <Section title="Urgentes" tasks={overdue} accent="var(--destructive)" workspaceId={workspaceId} userId={userId} />}
         {(isAll || isUrgentFilter) && <Section title="Hoy" tasks={today} accent="var(--destructive)" workspaceId={workspaceId} userId={userId} />}
-        {(isAll || isUrgentFilter) && <Section title="Mañana" tasks={tomorrow} accent="var(--chart-4)" workspaceId={workspaceId} userId={userId} />}
+        {(isAll || isUrgentFilter) && <Section title="Mañana" tasks={tomorrow} accent={ORANGE} workspaceId={workspaceId} userId={userId} />}
         {isAll && <Section title="Esta semana" tasks={thisWeek} accent="var(--chart-4)" workspaceId={workspaceId} userId={userId} />}
         {isAll && <Section title="Próximas" tasks={upcoming} accent="var(--chart-2)" workspaceId={workspaceId} userId={userId} />}
         {isAll && <Section title="Sin fecha" tasks={noDue} accent="var(--muted-foreground)" workspaceId={workspaceId} userId={userId} />}
@@ -103,7 +124,6 @@ export function TaskList({ tasks, workspaceId, filter = 'all', userId }: Props) 
         style={{
           background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)',
           color: 'var(--primary-foreground)',
-          backdropFilter: 'blur(12px)',
         }}
         aria-label="Nueva tarea"
       >
