@@ -20,16 +20,16 @@ export function TaskModal({ task, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="absolute inset-0 bg-black/20"
-        style={{ backdropFilter: 'blur(4px)' }}
+        className="absolute inset-0 bg-black/30 dark:bg-black/50"
+        style={{ backdropFilter: 'blur(8px)' }}
       />
       <div
-        className="relative w-full max-w-md bg-card rounded-3xl p-6 shadow-xl"
-        style={{ boxShadow: '0 24px 48px oklch(0.2 0.01 240 / 8%)' }}
+        className="relative w-full sm:max-w-md bg-card sm:rounded-3xl rounded-t-3xl p-6 shadow-xl"
+        style={{ boxShadow: '0 24px 64px oklch(0.05 0 0 / 32%)' }}
       >
         <div className="flex items-center justify-between mb-6">
           <h2

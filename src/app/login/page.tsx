@@ -84,7 +84,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full h-11 rounded-xl font-semibold text-sm"
                 style={{
-                  background: 'linear-gradient(135deg, var(--primary) 0%, oklch(0.38 0.18 25) 100%)',
+                  background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)',
                   fontFamily: 'var(--font-inter)',
                 }}
               >

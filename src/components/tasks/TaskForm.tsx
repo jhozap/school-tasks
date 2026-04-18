@@ -94,7 +94,7 @@ export function TaskForm({ task, onClose }: Props) {
           disabled={loading}
           className="flex-1 h-11 rounded-xl font-semibold"
           style={{
-            background: 'linear-gradient(135deg, var(--primary) 0%, oklch(0.38 0.18 25) 100%)',
+            background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)',
             fontFamily: 'var(--font-inter)',
           }}
         >

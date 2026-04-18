@@ -78,7 +78,7 @@ export function TaskList({ tasks, workspaceId }: Props) {
         onClick={() => setShowModal(true)}
         className="fixed bottom-6 right-8 w-14 h-14 rounded-full text-white text-2xl font-light shadow-lg flex items-center justify-center"
         style={{
-          background: 'linear-gradient(135deg, var(--primary) 0%, oklch(0.38 0.18 25) 100%)',
+          background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)',
           backdropFilter: 'blur(12px)',
         }}
         aria-label="Nueva tarea"
