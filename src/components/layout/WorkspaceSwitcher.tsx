@@ -107,8 +107,12 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Pr
 
       {open && (
         <div
-          className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-card rounded-2xl shadow-lg z-50 overflow-hidden"
-          style={{ boxShadow: '0 8px 32px oklch(0.2 0.01 240 / 12%)' }}
+          className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl z-50 overflow-hidden"
+          style={{
+            background: 'var(--card)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 40px oklch(0.05 0 0 / 20%)',
+          }}
         >
           <div className="p-2 space-y-0.5">
             {workspaces.map(ws => (
@@ -153,7 +157,7 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Pr
                     type="submit"
                     disabled={creating}
                     className="flex-1 text-xs py-1.5 rounded-lg text-white font-medium"
-                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, oklch(0.38 0.18 25) 100%)', fontFamily: 'var(--font-inter)' }}
+                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)', fontFamily: 'var(--font-inter)' }}
                   >
                     {creating ? '...' : 'Crear'}
                   </button>

@@ -69,9 +69,10 @@
   --ring: oklch(0.45 0.18 25);
   --chart-1: oklch(0.45 0.18 25);
   --chart-2: oklch(0.6 0.12 200);
-  --chart-3: oklch(0.7 0.1 140);
-  --chart-4: oklch(0.65 0.15 60);
+  --chart-3: oklch(0.62 0.14 142);
+  --chart-4: oklch(0.72 0.14 75);
   --chart-5: oklch(0.55 0.14 300);
+  --cta-gradient-end: oklch(0.38 0.18 25);
   --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.2 0.01 240);
@@ -84,37 +85,41 @@
 }
 
 .dark {
-  --background: oklch(0.13 0.005 240);
-  --foreground: oklch(0.94 0 0);
-  --card: oklch(0.18 0.005 240);
-  --card-foreground: oklch(0.94 0 0);
-  --popover: oklch(0.18 0.005 240);
-  --popover-foreground: oklch(0.94 0 0);
-  --primary: oklch(0.62 0.18 25);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.24 0.005 240);
-  --secondary-foreground: oklch(0.94 0 0);
-  --muted: oklch(0.24 0.005 240);
-  --muted-foreground: oklch(0.6 0.005 240);
-  --accent: oklch(0.24 0.005 240);
-  --accent-foreground: oklch(0.94 0 0);
-  --destructive: oklch(0.65 0.2 25);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.62 0.18 25);
-  --chart-1: oklch(0.62 0.18 25);
-  --chart-2: oklch(0.65 0.12 200);
-  --chart-3: oklch(0.72 0.12 140);
-  --chart-4: oklch(0.72 0.15 60);
-  --chart-5: oklch(0.65 0.14 300);
-  --sidebar: oklch(0.18 0.005 240);
-  --sidebar-foreground: oklch(0.94 0 0);
-  --sidebar-primary: oklch(0.62 0.18 25);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.24 0.005 240);
-  --sidebar-accent-foreground: oklch(0.94 0 0);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.62 0.18 25);
+  /* Midnight Botanical — surface hierarchy */
+  --background: oklch(0.10 0 0);
+  --foreground: oklch(0.915 0.005 60);
+  --card: oklch(0.145 0.003 40);
+  --card-foreground: oklch(0.915 0.005 60);
+  --popover: oklch(0.145 0.003 40);
+  --popover-foreground: oklch(0.915 0.005 60);
+  /* Green primary "The Growth" */
+  --primary: oklch(0.82 0.18 142);
+  --primary-foreground: oklch(0.22 0.08 142);
+  --secondary: oklch(0.175 0.003 40);
+  --secondary-foreground: oklch(0.915 0.005 60);
+  --muted: oklch(0.175 0.003 40);
+  --muted-foreground: oklch(0.58 0.005 40);
+  --accent: oklch(0.175 0.003 40);
+  --accent-foreground: oklch(0.915 0.005 60);
+  /* Salmon urgent "The Alert" */
+  --destructive: oklch(0.72 0.18 22);
+  --border: oklch(1 0 0 / 6%);
+  --input: oklch(1 0 0 / 8%);
+  --ring: oklch(0.82 0.18 142);
+  --chart-1: oklch(0.82 0.18 142);
+  --chart-2: oklch(0.58 0.005 40);
+  --chart-3: oklch(0.62 0.14 142);
+  --chart-4: oklch(0.80 0.16 85);
+  --chart-5: oklch(0.72 0.18 22);
+  --cta-gradient-end: oklch(0.55 0.18 142);
+  --sidebar: oklch(0.145 0.003 40);
+  --sidebar-foreground: oklch(0.915 0.005 60);
+  --sidebar-primary: oklch(0.82 0.18 142);
+  --sidebar-primary-foreground: oklch(0.22 0.08 142);
+  --sidebar-accent: oklch(0.175 0.003 40);
+  --sidebar-accent-foreground: oklch(0.915 0.005 60);
+  --sidebar-border: oklch(1 0 0 / 6%);
+  --sidebar-ring: oklch(0.82 0.18 142);
 }
 
 @layer base {
