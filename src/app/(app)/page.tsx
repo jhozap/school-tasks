@@ -51,7 +51,7 @@ export default async function HomePage({ searchParams }: Props) {
 
   return (
     <>
-      <div className="lg:flex lg:min-h-screen">
+      <div className="lg:flex lg:h-screen lg:overflow-hidden">
         <Sidebar
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
@@ -59,7 +59,7 @@ export default async function HomePage({ searchParams }: Props) {
           filter={filter}
         />
 
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 lg:overflow-y-auto">
           <TopBar
             userEmail={user!.email ?? ''}
             userName={user!.user_metadata?.full_name ?? user!.user_metadata?.name ?? ''}
