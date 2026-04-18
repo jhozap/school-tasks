@@ -21,56 +21,70 @@ function getDiffDays(dueDateStr: string) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const due = new Date(dueDateStr + 'T00:00:00')
-  return Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 }
 
 function getAccentColor(task: TaskWithAttachments) {
   if (task.status === 'completed') return 'var(--chart-3)'
-  if (!task.due_date) return 'var(--chart-2)'
+  if (!task.due_date) return 'var(--muted-foreground)'
   const diff = getDiffDays(task.due_date)
-  if (diff <= 1) return 'var(--destructive)'
-  if (diff <= 4) return 'var(--chart-4)'
+  if (diff < 0)  return 'var(--destructive)'
+  if (diff === 0) return 'var(--destructive)'
+  if (diff === 1) return 'var(--chart-4)'
+  if (diff <= 7)  return 'var(--chart-4)'
   return 'var(--chart-2)'
+}
+
+function CheckIcon() {
+  return <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+}
+function AlertIcon() {
+  return <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+}
+function ClockIcon() {
+  return <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
 }
 
 function StatusChip({ task }: { task: TaskWithAttachments }) {
   if (task.status === 'completed') {
     return (
-      <span
-        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-        style={{ background: 'oklch(from var(--chart-3) l c h / 0.15)', color: 'var(--chart-3)', fontFamily: 'var(--font-inter)' }}
-      >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        Completado
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+        style={{ background: 'oklch(from var(--chart-3) l c h / 0.15)', color: 'var(--chart-3)', fontFamily: 'var(--font-inter)' }}>
+        <CheckIcon /> Completado
       </span>
     )
   }
   if (!task.due_date) return null
   const diff = getDiffDays(task.due_date)
-  if (diff <= 1) {
-    return (
-      <span
-        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-        style={{ background: 'oklch(from var(--destructive) l c h / 0.15)', color: 'var(--destructive)', fontFamily: 'var(--font-inter)' }}
-      >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        Urgente
-      </span>
-    )
-  }
+
+  if (diff < 0) return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+      style={{ background: 'oklch(from var(--destructive) l c h / 0.15)', color: 'var(--destructive)', fontFamily: 'var(--font-inter)' }}>
+      <AlertIcon /> Vencida
+    </span>
+  )
+  if (diff === 0) return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+      style={{ background: 'oklch(from var(--destructive) l c h / 0.15)', color: 'var(--destructive)', fontFamily: 'var(--font-inter)' }}>
+      <AlertIcon /> Hoy
+    </span>
+  )
+  if (diff === 1) return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+      style={{ background: 'oklch(from var(--chart-4) l c h / 0.15)', color: 'var(--chart-4)', fontFamily: 'var(--font-inter)' }}>
+      <ClockIcon /> Mañana
+    </span>
+  )
+  if (diff <= 7) return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+      style={{ background: 'oklch(from var(--chart-4) l c h / 0.15)', color: 'var(--chart-4)', fontFamily: 'var(--font-inter)' }}>
+      <ClockIcon /> Esta semana
+    </span>
+  )
   return (
-    <span
-      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-      style={{ background: 'oklch(from var(--chart-4) l c h / 0.15)', color: 'var(--chart-4)', fontFamily: 'var(--font-inter)' }}
-    >
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-      </svg>
-      Próximo
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+      style={{ background: 'oklch(from var(--chart-2) l c h / 0.15)', color: 'var(--chart-2)', fontFamily: 'var(--font-inter)' }}>
+      <ClockIcon /> Próxima
     </span>
   )
 }
