@@ -86,7 +86,7 @@ export function TaskList({ tasks, workspaceId, filter = 'all' }: Props) {
 
       <button
         onClick={() => setShowModal(true)}
-        className="fixed bottom-20 right-5 lg:bottom-6 lg:right-8 w-14 h-14 rounded-full text-2xl font-light shadow-lg flex items-center justify-center"
+        className="lg:hidden fixed bottom-20 right-5 w-14 h-14 rounded-full text-2xl font-light shadow-lg flex items-center justify-center"
         style={{
           background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)',
           color: 'var(--primary-foreground)',
