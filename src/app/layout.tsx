@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { PwaRegister } from "@/components/PwaRegister";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -18,6 +19,20 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "School Tasks",
   description: "Gestiona las tareas escolares fácilmente",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "School Tasks",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#7c3aed",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -33,6 +48,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background">
         <Providers>{children}</Providers>
+        <PwaRegister />
       </body>
     </html>
   );
