@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { PwaRegister } from "@/components/PwaRegister";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -49,6 +50,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background">
         <Providers>{children}</Providers>
         <PwaRegister />
+        <SpeedInsights />
       </body>
     </html>
   );

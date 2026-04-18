@@ -1,8 +1,6 @@
 'use client'
 
-import { useState } from 'react'
 import { TaskCard } from './TaskCard'
-import { TaskModal } from './TaskModal'
 import type { TaskWithAttachments } from '@/types'
 
 interface Props {
@@ -52,7 +50,6 @@ function Section({
 }
 
 export function TaskList({ tasks, workspaceId, filter = 'all', userId }: Props) {
-  const [showModal, setShowModal] = useState(false)
   const { urgent, upcoming, completed } = groupTasks(tasks)
 
   const isUrgentFilter = filter === 'urgent'
@@ -86,19 +83,6 @@ export function TaskList({ tasks, workspaceId, filter = 'all', userId }: Props) 
         {isAll && <Section title="Completadas" tasks={completed} accent="var(--chart-3)" workspaceId={workspaceId} userId={userId} />}
       </div>
 
-      <button
-        onClick={() => setShowModal(true)}
-        className="lg:hidden fixed bottom-20 right-5 w-14 h-14 rounded-full text-2xl font-light shadow-lg flex items-center justify-center"
-        style={{
-          background: 'linear-gradient(135deg, var(--primary) 0%, var(--cta-gradient-end) 100%)',
-          color: 'var(--primary-foreground)',
-        }}
-        aria-label="Nueva tarea"
-      >
-        +
-      </button>
-
-      {showModal && <TaskModal onClose={() => setShowModal(false)} />}
     </>
   )
 }
