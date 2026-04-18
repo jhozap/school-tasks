@@ -282,20 +282,22 @@ export function TaskDetailView({ task, userId, workspaceId, initialEdit = false 
           {/* Task header */}
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <button
-                onClick={handleToggle}
-                className="mt-1.5 flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
-                style={{
-                  borderColor: task.status === 'completed' ? 'var(--chart-3)' : 'var(--border)',
-                  background: task.status === 'completed' ? 'var(--chart-3)' : 'transparent',
-                }}
-              >
-                {task.status === 'completed' && (
-                  <svg width="11" height="9" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </button>
+              {!editMode && (
+                <button
+                  onClick={handleToggle}
+                  className="mt-1.5 flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                  style={{
+                    borderColor: task.status === 'completed' ? 'var(--chart-3)' : 'var(--border)',
+                    background: task.status === 'completed' ? 'var(--chart-3)' : 'transparent',
+                  }}
+                >
+                  {task.status === 'completed' && (
+                    <svg width="11" height="9" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+              )}
 
               {editMode ? (
                 <input
@@ -414,7 +416,7 @@ export function TaskDetailView({ task, userId, workspaceId, initialEdit = false 
 
                     {/* Action overlay */}
                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {a.signedUrl && (
+                      {!editMode && a.signedUrl && (
                         <button
                           onClick={() => downloadBlob(a.signedUrl!, a.file_name)}
                           className="w-7 h-7 rounded-lg flex items-center justify-center shadow-md"
@@ -525,7 +527,7 @@ export function TaskDetailView({ task, userId, workspaceId, initialEdit = false 
                       <p className="text-sm font-medium truncate" style={{ fontFamily: 'var(--font-inter)' }}>{a.file_name}</p>
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {a.signedUrl && (
+                      {!editMode && a.signedUrl && (
                         <button
                           onClick={() => downloadBlob(a.signedUrl!, a.file_name)}
                           className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
