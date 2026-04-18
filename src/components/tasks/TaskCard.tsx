@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useOptimistic, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toggleTask, deleteTask } from '@/app/(app)/actions'
 import type { TaskWithAttachments } from '@/types'
@@ -129,11 +129,23 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [, startTransition] = useTransition()
   const isOwner = task.created_by === userId
 
-  async function handleToggle(e: React.MouseEvent) {
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic(
+    task.status,
+    (_: string, next: string) => next,
+  )
+
+  const optimisticTask = { ...task, status: optimisticStatus } as TaskWithAttachments
+
+  function handleToggle(e: React.MouseEvent) {
     e.stopPropagation()
-    await toggleTask(task.id, task.status)
+    const next = task.status === 'pending' ? 'completed' : 'pending'
+    startTransition(async () => {
+      setOptimisticStatus(next)
+      await toggleTask(task.id, task.status)
+    })
   }
 
   async function handleDelete() {
@@ -147,7 +159,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
     setMenuOpen(v => !v)
   }
 
-  const accentColor = getAccentColor(task)
+  const accentColor = getAccentColor(optimisticTask)
 
   return (
     <>
@@ -162,7 +174,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
         <div className="flex-1 px-4 pt-2.5 pb-3.5 min-w-0 space-y-2">
           {/* Top row: badge + menu */}
           <div className="flex items-center justify-between gap-2">
-            <StatusChip task={task} />
+            <StatusChip task={optimisticTask} />
 
             {isOwner && (
               <div className="relative flex-shrink-0" onClick={e => e.stopPropagation()}>
@@ -219,12 +231,12 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
               onClick={handleToggle}
               className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
               style={{
-                borderColor: task.status === 'completed' ? 'var(--chart-3)' : 'var(--border)',
-                background: task.status === 'completed' ? 'var(--chart-3)' : 'transparent',
+                borderColor: optimisticStatus === 'completed' ? 'var(--chart-3)' : 'var(--border)',
+                background: optimisticStatus === 'completed' ? 'var(--chart-3)' : 'transparent',
               }}
               aria-label="Cambiar estado"
             >
-              {task.status === 'completed' && (
+              {optimisticStatus === 'completed' && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
                   <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -235,8 +247,8 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
                 className="text-sm font-semibold leading-snug"
                 style={{
                   fontFamily: 'var(--font-inter)',
-                  textDecoration: task.status === 'completed' ? 'line-through' : 'none',
-                  color: task.status === 'completed' ? 'var(--muted-foreground)' : 'inherit',
+                  textDecoration: optimisticStatus === 'completed' ? 'line-through' : 'none',
+                  color: optimisticStatus === 'completed' ? 'var(--muted-foreground)' : 'inherit',
                 }}
               >
                 {task.title}
