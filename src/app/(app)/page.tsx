@@ -3,6 +3,7 @@ import { logout } from '@/app/login/actions'
 import { Button } from '@/components/ui/button'
 import { TaskList } from '@/components/tasks/TaskList'
 import { WorkspaceSwitcher } from '@/components/layout/WorkspaceSwitcher'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import type { TaskWithAttachments, Workspace } from '@/types'
 
@@ -54,16 +55,19 @@ export default async function HomePage() {
             {tasks.filter(t => t.status === 'pending').length} pendientes
           </p>
         </div>
-        <form action={logout}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground text-xs"
-            style={{ fontFamily: 'var(--font-inter)' }}
-          >
-            Salir
-          </Button>
-        </form>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <form action={logout}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground text-xs"
+              style={{ fontFamily: 'var(--font-inter)' }}
+            >
+              Salir
+            </Button>
+          </form>
+        </div>
       </header>
 
       <TaskList tasks={tasks} workspaceId={workspaceId ?? ''} />

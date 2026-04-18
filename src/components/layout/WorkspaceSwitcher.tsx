@@ -107,7 +107,7 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Pr
 
       {open && (
         <div
-          className="absolute top-full left-0 mt-2 w-64 bg-card rounded-2xl shadow-lg z-50 overflow-hidden"
+          className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-card rounded-2xl shadow-lg z-50 overflow-hidden"
           style={{ boxShadow: '0 8px 32px oklch(0.2 0.01 240 / 12%)' }}
         >
           <div className="p-2 space-y-0.5">
