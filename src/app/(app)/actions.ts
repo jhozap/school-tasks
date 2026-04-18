@@ -15,6 +15,7 @@ export async function createTask(formData: FormData) {
 
   const { error } = await supabase.from('tasks').insert({
     workspace_id: workspaceId,
+    created_by: user.id,
     title: formData.get('title') as string,
     description: (formData.get('description') as string) || null,
     due_date: (formData.get('due_date') as string) || null,

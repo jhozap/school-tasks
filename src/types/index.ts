@@ -7,6 +7,7 @@ export type Task = {
   due_date: string | null
   status: TaskStatus
   workspace_id: string
+  created_by: string
   created_at: string
 }
 

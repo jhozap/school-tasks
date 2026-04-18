@@ -92,7 +92,7 @@ export default async function HomePage({ searchParams }: Props) {
             </header>
 
             <RealtimeTaskSync workspaceId={workspaceId ?? ''} />
-            <TaskList tasks={tasks} workspaceId={workspaceId ?? ''} filter={filter} />
+            <TaskList tasks={tasks} workspaceId={workspaceId ?? ''} filter={filter} userId={user!.id} />
           </main>
         </div>
       </div>
