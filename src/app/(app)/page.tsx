@@ -24,12 +24,15 @@ export default async function HomePage({ searchParams }: Props) {
 
   const workspaceId = await getActiveWorkspaceId(supabase, user!.id)
 
-  // Shell data: workspaces + reminders — fast queries, no joins
-  const [wsData, remindersRes] = await Promise.all([
+  // Shell data: workspaces + reminders + pending count — fast, no joins
+  const [wsData, remindersRes, countRes] = await Promise.all([
     supabase.from('workspace_users').select('workspaces(*)').eq('user_id', user!.id),
     workspaceId
       ? supabase.from('reminders').select('*').eq('workspace_id', workspaceId).order('remind_at', { ascending: true })
       : Promise.resolve({ data: [] }),
+    workspaceId
+      ? supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId).eq('status', 'pending')
+      : Promise.resolve({ count: 0 }),
   ])
 
   const workspaces: Workspace[] = ((wsData.data ?? []) as { workspaces: unknown }[])
@@ -39,6 +42,7 @@ export default async function HomePage({ searchParams }: Props) {
   if (workspaces.length === 0) redirect('/onboarding')
 
   const reminders = (remindersRes.data as Reminder[]) ?? []
+  const pendingCount = (countRes as { count: number | null }).count ?? 0
   const activeWorkspace = workspaces.find(w => w.id === workspaceId)
   const isOwner = activeWorkspace?.created_by === user!.id
 
@@ -60,7 +64,7 @@ export default async function HomePage({ searchParams }: Props) {
             userName={user!.user_metadata?.full_name ?? user!.user_metadata?.name ?? ''}
             avatarUrl={user!.user_metadata?.avatar_url ?? user!.user_metadata?.picture ?? ''}
             filter={filter}
-            pendingCount={0}
+            pendingCount={pendingCount}
             reminders={reminders}
           />
 
