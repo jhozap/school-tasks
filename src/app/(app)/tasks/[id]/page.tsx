@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUser } from '@/lib/auth'
 import { notFound } from 'next/navigation'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import { TaskDetailView } from '@/components/tasks/TaskDetailView'
@@ -10,10 +11,12 @@ interface Props {
 }
 
 export default async function TaskDetailPage({ params, searchParams }: Props) {
-  const { id } = await params
-  const { edit } = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [{ id }, { edit }, user, supabase] = await Promise.all([
+    params,
+    searchParams,
+    getUser(),
+    createClient(),
+  ])
 
   const workspaceId = await getActiveWorkspaceId(supabase, user!.id)
 

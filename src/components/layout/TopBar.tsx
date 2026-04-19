@@ -64,6 +64,8 @@ export function TopBar({ userEmail, userName, avatarUrl, filter, pendingCount, r
               <img
                 src={avatarUrl}
                 alt={displayName}
+                loading="lazy"
+                decoding="async"
                 className="w-7 h-7 rounded-full object-cover flex-shrink-0"
               />
             ) : (
@@ -105,7 +107,7 @@ export function TopBar({ userEmail, userName, avatarUrl, filter, pendingCount, r
               >
                 <div className="flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt={displayName} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                    <img src={avatarUrl} alt={displayName} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                   ) : (
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
