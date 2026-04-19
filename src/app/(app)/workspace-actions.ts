@@ -1,8 +1,9 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { setActiveWorkspaceCookie } from '@/lib/workspace'
+import { setActiveWorkspaceCookie, clearActiveWorkspaceCookie } from '@/lib/workspace'
 
 export async function createWorkspace(name: string) {
   const supabase = await createClient()
@@ -43,6 +44,46 @@ export async function switchWorkspace(workspaceId: string) {
 
   await setActiveWorkspaceCookie(workspaceId)
   revalidatePath('/')
+}
+
+export async function deleteWorkspace(workspaceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  // Verify ownership (RLS also blocks non-owners)
+  const { data: ws } = await supabase
+    .from('workspaces')
+    .select('id')
+    .eq('id', workspaceId)
+    .eq('created_by', user.id)
+    .single()
+  if (!ws) return { error: 'Sin permisos para eliminar este workspace' }
+
+  // Fetch all file attachments (not links) to delete from storage
+  const { data: fileAttachments } = await supabase
+    .from('attachments')
+    .select('file_url, tasks!inner(workspace_id)')
+    .eq('tasks.workspace_id', workspaceId)
+    .neq('file_type', 'link')
+
+  if (fileAttachments?.length) {
+    const paths = (fileAttachments as { file_url: string }[]).map(a => a.file_url)
+    await supabase.storage.from('attachments').remove(paths)
+  }
+
+  // Delete workspace — DB cascade handles workspace_users, tasks, attachments, reminders, invitations
+  const { error } = await supabase.from('workspaces').delete().eq('id', workspaceId)
+  if (error) return { error: error.message }
+
+  // Clear cookie if this was the active workspace
+  const cookieStore = await cookies()
+  if (cookieStore.get('active_workspace_id')?.value === workspaceId) {
+    await clearActiveWorkspaceCookie()
+  }
+
+  revalidatePath('/')
+  return {}
 }
 
 export async function createInvitation(workspaceId: string) {

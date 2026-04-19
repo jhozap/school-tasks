@@ -42,6 +42,7 @@ export default async function RemindersPage() {
         <Sidebar
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
+          userId={user!.id}
           isOwner={isOwner}
           filter="reminders"
         />
@@ -71,6 +72,7 @@ export default async function RemindersPage() {
       <Suspense>
         <BottomNav
           userEmail={user!.email ?? ''}
+          userId={user!.id}
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
           remindersCount={reminders.length}
