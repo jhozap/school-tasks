@@ -1,17 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { getUser } from '@/lib/auth'
-import { TaskList } from '@/components/tasks/TaskList'
 import { WorkspaceSwitcher } from '@/components/layout/WorkspaceSwitcher'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { NotificationBell } from '@/components/layout/NotificationBell'
-import { RealtimeTaskSync } from '@/components/tasks/RealtimeTaskSync'
+import { TaskFeed } from '@/components/tasks/TaskFeed'
+import { TaskFeedSkeleton } from '@/components/tasks/TaskFeedSkeleton'
+import { AutoRefresh } from '@/components/AutoRefresh'
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { getActiveWorkspaceId } from '@/lib/workspace'
-import type { TaskWithAttachments, Workspace, Reminder } from '@/types'
+import type { Workspace, Reminder } from '@/types'
 
 interface Props {
   searchParams: Promise<{ filter?: string }>
@@ -23,25 +24,11 @@ export default async function HomePage({ searchParams }: Props) {
 
   const workspaceId = await getActiveWorkspaceId(supabase, user!.id)
 
-  // Fetch workspaces + content in parallel once we have the workspace id
-  const [wsData, tasksRes, remindersRes] = await Promise.all([
-    supabase
-      .from('workspace_users')
-      .select('workspaces(*)')
-      .eq('user_id', user!.id),
+  // Shell data: workspaces + reminders — fast queries, no joins
+  const [wsData, remindersRes] = await Promise.all([
+    supabase.from('workspace_users').select('workspaces(*)').eq('user_id', user!.id),
     workspaceId
-      ? supabase
-          .from('tasks')
-          .select('*, attachments(*)')
-          .eq('workspace_id', workspaceId)
-          .order('due_date', { ascending: true, nullsFirst: false })
-      : Promise.resolve({ data: [] }),
-    workspaceId
-      ? supabase
-          .from('reminders')
-          .select('*')
-          .eq('workspace_id', workspaceId)
-          .order('remind_at', { ascending: true })
+      ? supabase.from('reminders').select('*').eq('workspace_id', workspaceId).order('remind_at', { ascending: true })
       : Promise.resolve({ data: [] }),
   ])
 
@@ -51,14 +38,14 @@ export default async function HomePage({ searchParams }: Props) {
 
   if (workspaces.length === 0) redirect('/onboarding')
 
-  const tasks = (tasksRes.data as TaskWithAttachments[]) ?? []
   const reminders = (remindersRes.data as Reminder[]) ?? []
-
   const activeWorkspace = workspaces.find(w => w.id === workspaceId)
   const isOwner = activeWorkspace?.created_by === user!.id
 
   return (
     <>
+      <AutoRefresh />
+
       <div className="lg:flex lg:h-screen lg:overflow-hidden">
         <Sidebar
           workspaces={workspaces}
@@ -73,7 +60,7 @@ export default async function HomePage({ searchParams }: Props) {
             userName={user!.user_metadata?.full_name ?? user!.user_metadata?.name ?? ''}
             avatarUrl={user!.user_metadata?.avatar_url ?? user!.user_metadata?.picture ?? ''}
             filter={filter}
-            pendingCount={tasks.filter(t => t.status === 'pending').length}
+            pendingCount={0}
             reminders={reminders}
           />
 
@@ -91,9 +78,6 @@ export default async function HomePage({ searchParams }: Props) {
                     Tareas
                   </h1>
                 )}
-                <p className="text-xs text-muted-foreground" style={{ fontFamily: 'var(--font-inter)' }}>
-                  {tasks.filter(t => t.status === 'pending').length} pendientes
-                </p>
               </div>
               <div className="flex items-center gap-2">
                 <NotificationBell reminders={reminders} />
@@ -101,8 +85,14 @@ export default async function HomePage({ searchParams }: Props) {
               </div>
             </header>
 
-            <RealtimeTaskSync workspaceId={workspaceId ?? ''} />
-            <TaskList tasks={tasks} workspaceId={workspaceId ?? ''} filter={filter} userId={user!.id} />
+            {/* Tasks stream in independently — skeleton shown while loading */}
+            <Suspense fallback={<TaskFeedSkeleton />}>
+              <TaskFeed
+                workspaceId={workspaceId ?? ''}
+                filter={filter}
+                userId={user!.id}
+              />
+            </Suspense>
           </main>
         </div>
       </div>

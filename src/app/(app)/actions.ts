@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspaceId } from '@/lib/workspace'
-import { broadcastTaskChange } from '@/lib/broadcast'
 
 export async function createTask(formData: FormData) {
   const supabase = await createClient()
@@ -23,15 +22,12 @@ export async function createTask(formData: FormData) {
 
   if (error) return { error: error.message }
   revalidatePath('/')
-  void broadcastTaskChange(workspaceId)
 }
 
 export async function updateTask(id: string, formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
-
-  const workspaceId = await getActiveWorkspaceId(supabase, user.id)
 
   const { error } = await supabase.from('tasks').update({
     title: formData.get('title') as string,
@@ -41,15 +37,12 @@ export async function updateTask(id: string, formData: FormData) {
 
   if (error) return { error: error.message }
   revalidatePath('/')
-  if (workspaceId) void broadcastTaskChange(workspaceId)
 }
 
 export async function toggleTask(id: string, status: 'pending' | 'completed') {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
-
-  const workspaceId = await getActiveWorkspaceId(supabase, user.id)
 
   const { error } = await supabase
     .from('tasks')
@@ -58,7 +51,6 @@ export async function toggleTask(id: string, status: 'pending' | 'completed') {
 
   if (error) return { error: error.message }
   revalidatePath('/')
-  if (workspaceId) void broadcastTaskChange(workspaceId)
 }
 
 export async function deleteTask(id: string) {
@@ -66,10 +58,7 @@ export async function deleteTask(id: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const workspaceId = await getActiveWorkspaceId(supabase, user.id)
-
   const { error } = await supabase.from('tasks').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/')
-  if (workspaceId) void broadcastTaskChange(workspaceId)
 }

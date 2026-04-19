@@ -402,6 +402,8 @@ export function TaskDetailView({ task, userId, workspaceId, initialEdit = false 
                           <img
                             src={a.signedUrl}
                             alt={a.file_name}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
                         </button>
@@ -653,6 +655,7 @@ export function TaskDetailView({ task, userId, workspaceId, initialEdit = false 
         >
           <img
             src={lightboxSrc}
+            decoding="async"
             className="max-w-full max-h-full rounded-2xl object-contain"
             onClick={e => e.stopPropagation()}
           />
