@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { logout } from '@/app/login/actions'
 import { deleteWorkspace } from '@/app/(app)/workspace-actions'
 import { TaskModal } from '@/components/tasks/TaskModal'
@@ -67,6 +67,7 @@ export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, re
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [, startTransition] = useTransition()
   const filter = searchParams.get('filter') ?? 'all'
   const [showProfile, setShowProfile] = useState(false)
   const [fabExpanded, setFabExpanded] = useState(false)
@@ -88,8 +89,15 @@ export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, re
     router.push('/')
   }
 
+  useEffect(() => {
+    router.prefetch('/calendar')
+    router.prefetch('/reminders')
+    router.prefetch('/?filter=all')
+    router.prefetch('/?filter=urgent')
+  }, [router])
+
   function navigate(f: string) {
-    router.push(`/?filter=${f}`)
+    startTransition(() => router.push(`/?filter=${f}`))
   }
 
   function openTask() {
@@ -215,7 +223,7 @@ export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, re
             return (
               <button
                 key={tab.id}
-                onClick={() => router.push('/calendar')}
+                onClick={() => startTransition(() => router.push('/calendar'))}
                 className="flex-1 flex flex-col items-center gap-1 py-3 transition-colors"
                 style={{ color: active ? 'var(--primary)' : 'var(--muted-foreground)', fontFamily: 'var(--font-inter)' }}
               >

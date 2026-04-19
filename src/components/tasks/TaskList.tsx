@@ -1,12 +1,12 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import { TaskCard } from './TaskCard'
 import type { TaskWithAttachments } from '@/types'
 
 interface Props {
   tasks: TaskWithAttachments[]
   workspaceId: string
-  filter?: string
   userId: string
 }
 
@@ -49,7 +49,9 @@ function Section({
   )
 }
 
-export function TaskList({ tasks, workspaceId, filter = 'all', userId }: Props) {
+export function TaskList({ tasks, workspaceId, userId }: Props) {
+  const searchParams = useSearchParams()
+  const filter = searchParams.get('filter') ?? 'all'
   const { urgent, upcoming, completed } = groupTasks(tasks)
 
   const isUrgentFilter = filter === 'urgent'

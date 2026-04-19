@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { logout } from '@/app/login/actions'
 import { ThemeToggle } from './ThemeToggle'
 import { NotificationBell } from './NotificationBell'
@@ -10,7 +11,6 @@ interface Props {
   userEmail: string
   userName: string
   avatarUrl: string
-  filter: string
   pendingCount: number
   reminders: Reminder[]
 }
@@ -27,10 +27,13 @@ function getInitials(name: string, email: string) {
   return local.slice(0, 2).toUpperCase()
 }
 
-export function TopBar({ userEmail, userName, avatarUrl, filter, pendingCount, reminders }: Props) {
+export function TopBar({ userEmail, userName, avatarUrl, pendingCount, reminders }: Props) {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
   const initials = getInitials(userName, userEmail)
   const displayName = userName || userEmail
+  const filter = pathname === '/calendar' ? 'calendar' : pathname === '/reminders' ? 'reminders' : (searchParams.get('filter') ?? 'all')
   const title = filter === 'urgent' ? 'Urgente' : filter === 'calendar' ? 'Calendario' : filter === 'reminders' ? 'Recordatorios' : 'Dashboard'
 
   return (

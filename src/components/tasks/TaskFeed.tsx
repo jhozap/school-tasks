@@ -4,11 +4,10 @@ import type { TaskWithAttachments } from '@/types'
 
 interface Props {
   workspaceId: string
-  filter: string
   userId: string
 }
 
-export async function TaskFeed({ workspaceId, filter, userId }: Props) {
+export async function TaskFeed({ workspaceId, userId }: Props) {
   const supabase = await createClient()
 
   const { data } = await supabase
@@ -20,6 +19,6 @@ export async function TaskFeed({ workspaceId, filter, userId }: Props) {
   const tasks = (data as TaskWithAttachments[]) ?? []
 
   return (
-    <TaskList tasks={tasks} workspaceId={workspaceId} filter={filter} userId={userId} />
+    <TaskList tasks={tasks} workspaceId={workspaceId} userId={userId} />
   )
 }
