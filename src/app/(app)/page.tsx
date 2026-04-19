@@ -83,13 +83,15 @@ export default async function HomePage() {
               </div>
             </header>
 
-            {/* Tasks stream in independently — skeleton shown while loading */}
-            <Suspense fallback={<TaskFeedSkeleton />}>
-              <TaskFeed
-                workspaceId={workspaceId ?? ''}
-                userId={user!.id}
-              />
-            </Suspense>
+            {/* min-h reserves space so Suspense resolution doesn't shift content (CLS) */}
+            <div className="min-h-[560px]">
+              <Suspense fallback={<TaskFeedSkeleton />}>
+                <TaskFeed
+                  workspaceId={workspaceId ?? ''}
+                  userId={user!.id}
+                />
+              </Suspense>
+            </div>
           </main>
         </div>
       </div>

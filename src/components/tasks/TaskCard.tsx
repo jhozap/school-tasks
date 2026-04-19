@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { toggleTask, deleteTask } from '@/app/(app)/actions'
 import type { TaskWithAttachments } from '@/types'
 import { getDiffDays, formatDateParts, getTaskAccentColor } from '@/lib/dates'
@@ -106,7 +106,6 @@ function AttachmentBadges({ attachments }: { attachments: TaskWithAttachments['a
 }
 
 export function TaskCard({ task, workspaceId, userId }: Props) {
-  const router = useRouter()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -146,10 +145,10 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
 
   return (
     <>
-      <div
+      <Link
+        href={`/tasks/${task.id}`}
         className="bg-card rounded-2xl flex overflow-hidden cursor-pointer group transition-shadow hover:shadow-md"
         style={{ boxShadow: '0 2px 16px oklch(0.05 0 0 / 8%)' }}
-        onClick={() => router.push(`/tasks/${task.id}`)}
       >
         {/* Accent bar */}
         <div className="w-1 flex-shrink-0 rounded-l-2xl" style={{ background: accentColor }} />
@@ -181,8 +180,9 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
                       style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
                       onClick={e => e.stopPropagation()}
                     >
-                      <button
-                        onClick={e => { e.stopPropagation(); setMenuOpen(false); router.push(`/tasks/${task.id}?edit=true`) }}
+                      <Link
+                        href={`/tasks/${task.id}?edit=true`}
+                        onClick={e => { e.stopPropagation(); setMenuOpen(false) }}
                         className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
                         style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}
                       >
@@ -191,7 +191,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                         Editar
-                      </button>
+                      </Link>
                       <button
                         onClick={e => { e.stopPropagation(); setMenuOpen(false); setConfirmDelete(true) }}
                         className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
@@ -282,7 +282,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setConfirmDelete(false)}>
