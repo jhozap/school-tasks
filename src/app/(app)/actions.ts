@@ -20,7 +20,7 @@ export async function createTask(formData: FormData) {
     due_date: (formData.get('due_date') as string) || null,
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: 'Error al crear la tarea' }
   revalidatePath('/')
 }
 
@@ -33,9 +33,9 @@ export async function updateTask(id: string, formData: FormData) {
     title: formData.get('title') as string,
     description: (formData.get('description') as string) || null,
     due_date: (formData.get('due_date') as string) || null,
-  }).eq('id', id)
+  }).eq('id', id).eq('created_by', user.id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: 'Error al actualizar la tarea' }
   revalidatePath('/')
 }
 
@@ -48,8 +48,9 @@ export async function toggleTask(id: string, status: 'pending' | 'completed') {
     .from('tasks')
     .update({ status: status === 'pending' ? 'completed' : 'pending' })
     .eq('id', id)
+    .eq('created_by', user.id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: 'Error al actualizar la tarea' }
   revalidatePath('/')
 }
 
@@ -58,7 +59,10 @@ export async function deleteTask(id: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { error } = await supabase.from('tasks').delete().eq('id', id)
-  if (error) return { error: error.message }
+  const { error } = await supabase.from('tasks').delete()
+    .eq('id', id)
+    .eq('created_by', user.id)
+
+  if (error) return { error: 'Error al eliminar la tarea' }
   revalidatePath('/')
 }

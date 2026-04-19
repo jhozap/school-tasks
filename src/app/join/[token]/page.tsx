@@ -13,11 +13,13 @@ export default async function JoinPage({ params }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  type InvitationRow = {
+    id: string; workspace_id: string; expires_at: string; used_at: string | null; workspace_name: string
+  }
+
   const { data: inv } = await supabase
-    .from('workspace_invitations')
-    .select('id, workspace_id, expires_at, used_at, workspaces(name)')
-    .eq('token', token)
-    .single()
+    .rpc('get_invitation_by_token', { p_token: token })
+    .single() as { data: InvitationRow | null }
 
   const isValid = inv && !inv.used_at && new Date(inv.expires_at) >= new Date()
 
@@ -48,7 +50,7 @@ export default async function JoinPage({ params }: Props) {
     redirect(`/register?next=/join/${token}`)
   }
 
-  const workspaceName = (inv.workspaces as unknown as { name: string } | null)?.name ?? 'Workspace compartido'
+  const workspaceName = inv?.workspace_name ?? 'Workspace compartido'
 
   async function handleAccept() {
     'use server'
