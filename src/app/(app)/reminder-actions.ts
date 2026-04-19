@@ -20,13 +20,19 @@ export async function createReminder(formData: FormData) {
     remind_at: formData.get('remind_at') as string,
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: 'Error al crear el recordatorio' }
   revalidatePath('/')
 }
 
 export async function deleteReminder(id: string) {
   const supabase = await createClient()
-  const { error } = await supabase.from('reminders').delete().eq('id', id)
-  if (error) return { error: error.message }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { error } = await supabase.from('reminders').delete()
+    .eq('id', id)
+    .eq('created_by', user.id)
+
+  if (error) return { error: 'Error al eliminar el recordatorio' }
   revalidatePath('/')
 }
