@@ -4,6 +4,7 @@ import { useState, useOptimistic, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toggleTask, deleteTask } from '@/app/(app)/actions'
 import type { TaskWithAttachments } from '@/types'
+import { getDiffDays, formatDateParts, getTaskAccentColor } from '@/lib/dates'
 
 interface Props {
   task: TaskWithAttachments
@@ -12,31 +13,6 @@ interface Props {
 }
 
 const ORANGE = 'oklch(0.72 0.19 47)'
-
-function formatDateParts(dateStr: string) {
-  const d = new Date(dateStr + 'T00:00:00')
-  return {
-    day: d.getDate(),
-    month: d.toLocaleDateString('es-CO', { month: 'short' }).replace('.', ''),
-    weekday: d.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', ''),
-  }
-}
-
-function getDiffDays(dueDateStr: string) {
-  const today = new Date(); today.setHours(0, 0, 0, 0)
-  const due = new Date(dueDateStr + 'T00:00:00')
-  return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-function getAccentColor(task: TaskWithAttachments) {
-  if (task.status === 'completed') return 'var(--chart-3)'
-  if (!task.due_date) return 'var(--muted-foreground)'
-  const d = getDiffDays(task.due_date)
-  if (d < 0 || d === 0) return 'var(--destructive)'
-  if (d === 1) return ORANGE
-  if (d <= 7) return 'var(--chart-4)'
-  return 'var(--chart-2)'
-}
 
 function AlertIcon() {
   return <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
@@ -164,7 +140,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
     setMenuOpen(v => !v)
   }
 
-  const accentColor = getAccentColor(optimisticTask)
+  const accentColor = getTaskAccentColor(optimisticTask.status, optimisticTask.due_date)
 
   const dateParts = task.due_date ? formatDateParts(task.due_date) : null
 

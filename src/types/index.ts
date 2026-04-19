@@ -41,6 +41,8 @@ export type Reminder = {
   created_at: string
 }
 
+export type ResolvedAttachment = Attachment & { signedUrl?: string }
+
 export type WorkspaceInvitation = {
   id: string
   workspace_id: string

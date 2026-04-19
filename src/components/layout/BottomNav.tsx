@@ -6,6 +6,7 @@ import { logout } from '@/app/login/actions'
 import { deleteWorkspace } from '@/app/(app)/workspace-actions'
 import { TaskModal } from '@/components/tasks/TaskModal'
 import { ReminderModal } from '@/components/tasks/ReminderModal'
+import { WorkspaceDeleteConfirm } from './WorkspaceDeleteConfirm'
 import type { Workspace } from '@/types'
 
 function HomeIcon({ filled }: { filled?: boolean }) {
@@ -285,29 +286,12 @@ export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, re
                   {ownedWorkspaces.map(ws => (
                     <div key={ws.id}>
                       {confirmDeleteId === ws.id ? (
-                        <div className="rounded-xl px-3 py-2.5 space-y-2" style={{ background: 'oklch(from var(--destructive) l c h / 0.08)', border: '1px solid oklch(from var(--destructive) l c h / 0.2)' }}>
-                          <p className="text-xs font-medium" style={{ fontFamily: 'var(--font-inter)', color: 'var(--destructive)' }}>
-                            ¿Eliminar &quot;{ws.name}&quot;? Esta acción no se puede deshacer.
-                          </p>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => setConfirmDeleteId(null)}
-                              disabled={deleting}
-                              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                              style={{ fontFamily: 'var(--font-inter)', background: 'var(--muted)', color: 'var(--foreground)' }}
-                            >
-                              Cancelar
-                            </button>
-                            <button
-                              onClick={() => handleDeleteWorkspace(ws.id)}
-                              disabled={deleting}
-                              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                              style={{ background: 'var(--destructive)', color: '#fff', fontFamily: 'var(--font-inter)', opacity: deleting ? 0.6 : 1 }}
-                            >
-                              {deleting ? 'Eliminando…' : 'Eliminar'}
-                            </button>
-                          </div>
-                        </div>
+                        <WorkspaceDeleteConfirm
+                          name={ws.name}
+                          deleting={deleting}
+                          onCancel={() => setConfirmDeleteId(null)}
+                          onConfirm={() => handleDeleteWorkspace(ws.id)}
+                        />
                       ) : (
                         <div className="flex items-center justify-between px-3 py-2 rounded-xl transition-colors" style={{ background: 'var(--muted)' }}>
                           <span className="text-sm font-medium truncate flex-1" style={{ fontFamily: 'var(--font-inter)' }}>
