@@ -3,17 +3,12 @@
 import { useSearchParams } from 'next/navigation'
 import { TaskCard } from './TaskCard'
 import type { TaskWithAttachments } from '@/types'
+import { getDiffDays } from '@/lib/dates'
 
 interface Props {
   tasks: TaskWithAttachments[]
   workspaceId: string
   userId: string
-}
-
-function getDiff(dueDateStr: string) {
-  const today = new Date(); today.setHours(0, 0, 0, 0)
-  const due = new Date(dueDateStr + 'T00:00:00')
-  return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 }
 
 function groupTasks(tasks: TaskWithAttachments[]) {
@@ -25,7 +20,7 @@ function groupTasks(tasks: TaskWithAttachments[]) {
     if (task.status === 'completed') { completed.push(task); continue }
     if (!task.due_date) { upcoming.push(task); continue }
 
-    const diff = getDiff(task.due_date)
+    const diff = getDiffDays(task.due_date)
     if (diff <= 1) urgent.push(task)
     else upcoming.push(task)
   }

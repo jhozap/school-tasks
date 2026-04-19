@@ -11,7 +11,7 @@ export function AutoRefresh() {
   useEffect(() => {
     const refresh = () => router.refresh()
     window.addEventListener('focus', refresh)
-    const interval = setInterval(refresh, 60_000)
+    const interval = setInterval(refresh, 300_000)
     return () => {
       window.removeEventListener('focus', refresh)
       clearInterval(interval)

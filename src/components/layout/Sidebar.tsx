@@ -6,6 +6,7 @@ import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { TaskModal } from '@/components/tasks/TaskModal'
 import { ReminderModal } from '@/components/tasks/ReminderModal'
 import { deleteWorkspace } from '@/app/(app)/workspace-actions'
+import { WorkspaceDeleteConfirm } from './WorkspaceDeleteConfirm'
 import type { Workspace } from '@/types'
 
 function DashboardIcon({ filled }: { filled?: boolean }) {
@@ -168,31 +169,12 @@ export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner }: Prop
             {ownedWorkspaces.map(ws => (
               <div key={ws.id}>
                 {confirmDeleteId === ws.id ? (
-                  <div className="rounded-xl px-3 py-2.5 space-y-2"
-                    style={{ background: 'oklch(from var(--destructive) l c h / 0.07)', border: '1px solid oklch(from var(--destructive) l c h / 0.18)' }}>
-                    <p className="text-xs font-medium leading-snug"
-                      style={{ color: 'var(--destructive)', fontFamily: 'var(--font-inter)' }}>
-                      ¿Eliminar &quot;{ws.name}&quot;? No se puede deshacer.
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setConfirmDeleteId(null)}
-                        disabled={deleting}
-                        className="flex-1 py-1 rounded-lg text-xs font-semibold transition-colors"
-                        style={{ fontFamily: 'var(--font-inter)', background: 'var(--muted)', color: 'var(--foreground)' }}
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteWorkspace(ws.id)}
-                        disabled={deleting}
-                        className="flex-1 py-1 rounded-lg text-xs font-semibold transition-colors"
-                        style={{ background: 'var(--destructive)', color: '#fff', fontFamily: 'var(--font-inter)', opacity: deleting ? 0.6 : 1 }}
-                      >
-                        {deleting ? 'Eliminando…' : 'Eliminar'}
-                      </button>
-                    </div>
-                  </div>
+                  <WorkspaceDeleteConfirm
+                    name={ws.name}
+                    deleting={deleting}
+                    onCancel={() => setConfirmDeleteId(null)}
+                    onConfirm={() => handleDeleteWorkspace(ws.id)}
+                  />
                 ) : (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl group"
                     style={{ background: 'transparent' }}>

@@ -4,15 +4,21 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { setActiveWorkspaceCookie, clearActiveWorkspaceCookie } from '@/lib/workspace'
+import { z } from 'zod'
+
+const workspaceNameSchema = z.string().min(1).max(100)
 
 export async function createWorkspace(name: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const parsed = workspaceNameSchema.safeParse(name.trim())
+  const safeName = parsed.success ? parsed.data : 'Nuevo workspace'
+
   const { data: ws, error: wsError } = await supabase
     .from('workspaces')
-    .insert({ name: name.trim() || 'Nuevo workspace', created_by: user.id })
+    .insert({ name: safeName, created_by: user.id })
     .select('id')
     .single()
 
