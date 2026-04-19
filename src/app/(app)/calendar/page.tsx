@@ -44,7 +44,6 @@ export default async function CalendarPage() {
           activeWorkspaceId={workspaceId ?? ''}
           userId={user!.id}
           isOwner={isOwner}
-          filter="calendar"
         />
 
         <div className="flex-1 flex flex-col min-w-0 lg:overflow-y-auto">
@@ -52,7 +51,6 @@ export default async function CalendarPage() {
             userEmail={user!.email ?? ''}
             userName={user!.user_metadata?.full_name ?? user!.user_metadata?.name ?? ''}
             avatarUrl={user!.user_metadata?.avatar_url ?? user!.user_metadata?.picture ?? ''}
-            filter="calendar"
             pendingCount={tasks.filter(t => t.status === 'pending').length}
             reminders={reminders}
           />

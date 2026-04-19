@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useTransition, useEffect } from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { TaskModal } from '@/components/tasks/TaskModal'
 import { ReminderModal } from '@/components/tasks/ReminderModal'
@@ -54,11 +54,13 @@ interface Props {
   activeWorkspaceId: string
   userId: string
   isOwner: boolean
-  filter: string
 }
 
-export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, filter }: Props) {
+export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner }: Props) {
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [, startTransition] = useTransition()
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [showReminderModal, setShowReminderModal] = useState(false)
   const [createExpanded, setCreateExpanded] = useState(false)
@@ -75,8 +77,16 @@ export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, filter
     router.push('/')
   }
 
-  const isCalendar = filter === 'calendar'
-  const isReminders = filter === 'reminders'
+  const filter = searchParams.get('filter') ?? 'all'
+  const isCalendar = pathname === '/calendar'
+  const isReminders = pathname === '/reminders'
+
+  useEffect(() => {
+    router.prefetch('/calendar')
+    router.prefetch('/reminders')
+    router.prefetch('/?filter=all')
+    router.prefetch('/?filter=urgent')
+  }, [router])
 
   const navItems = [
     { id: 'all', label: 'Dashboard', Icon: DashboardIcon },
@@ -86,9 +96,11 @@ export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, filter
   ]
 
   function handleNavClick(id: string) {
-    if (id === 'calendar') router.push('/calendar')
-    else if (id === 'reminders') router.push('/reminders')
-    else router.push(`/?filter=${id}`)
+    startTransition(() => {
+      if (id === 'calendar') router.push('/calendar')
+      else if (id === 'reminders') router.push('/reminders')
+      else router.push(`/?filter=${id}`)
+    })
   }
 
   function openTask() {

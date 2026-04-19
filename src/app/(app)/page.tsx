@@ -14,12 +14,7 @@ import { redirect } from 'next/navigation'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import type { Workspace, Reminder } from '@/types'
 
-interface Props {
-  searchParams: Promise<{ filter?: string }>
-}
-
-export default async function HomePage({ searchParams }: Props) {
-  const { filter = 'all' } = await searchParams
+export default async function HomePage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()])
 
   const workspaceId = await getActiveWorkspaceId(supabase, user!.id)
@@ -56,7 +51,6 @@ export default async function HomePage({ searchParams }: Props) {
           activeWorkspaceId={workspaceId ?? ''}
           userId={user!.id}
           isOwner={isOwner}
-          filter={filter}
         />
 
         <div className="flex-1 flex flex-col min-w-0 lg:overflow-y-auto">
@@ -64,7 +58,6 @@ export default async function HomePage({ searchParams }: Props) {
             userEmail={user!.email ?? ''}
             userName={user!.user_metadata?.full_name ?? user!.user_metadata?.name ?? ''}
             avatarUrl={user!.user_metadata?.avatar_url ?? user!.user_metadata?.picture ?? ''}
-            filter={filter}
             pendingCount={pendingCount}
             reminders={reminders}
           />
@@ -94,7 +87,6 @@ export default async function HomePage({ searchParams }: Props) {
             <Suspense fallback={<TaskFeedSkeleton />}>
               <TaskFeed
                 workspaceId={workspaceId ?? ''}
-                filter={filter}
                 userId={user!.id}
               />
             </Suspense>

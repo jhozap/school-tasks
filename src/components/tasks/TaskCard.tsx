@@ -13,8 +13,13 @@ interface Props {
 
 const ORANGE = 'oklch(0.72 0.19 47)'
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' })
+function formatDateParts(dateStr: string) {
+  const d = new Date(dateStr + 'T00:00:00')
+  return {
+    day: d.getDate(),
+    month: d.toLocaleDateString('es-CO', { month: 'short' }).replace('.', ''),
+    weekday: d.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', ''),
+  }
 }
 
 function getDiffDays(dueDateStr: string) {
@@ -161,6 +166,8 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
 
   const accentColor = getAccentColor(optimisticTask)
 
+  const dateParts = task.due_date ? formatDateParts(task.due_date) : null
+
   return (
     <>
       <div
@@ -171,6 +178,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
         {/* Accent bar */}
         <div className="w-1 flex-shrink-0 rounded-l-2xl" style={{ background: accentColor }} />
 
+        {/* Main content */}
         <div className="flex-1 px-4 pt-2.5 pb-3.5 min-w-0 space-y-2">
           {/* Top row: badge + menu */}
           <div className="flex items-center justify-between gap-2">
@@ -261,24 +269,43 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
             </div>
           </div>
 
-          {/* Bottom row: date + attachments */}
-          {(task.due_date || task.attachments?.length > 0) && (
-            <div className="flex items-center gap-2 pl-8 flex-wrap">
-              {task.due_date && (
-                <span
-                  className="inline-flex items-center gap-1 text-[11px] font-medium"
-                  style={{ fontFamily: 'var(--font-inter)', color: accentColor }}
-                >
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                  {formatDate(task.due_date)}
-                </span>
-              )}
+          {/* Bottom row: attachments */}
+          {task.attachments?.length > 0 && (
+            <div className="pl-8">
               <AttachmentBadges attachments={task.attachments} />
             </div>
           )}
         </div>
+
+        {/* Date block — right column */}
+        {dateParts && (
+          <div
+            className="flex-shrink-0 w-16 flex flex-col items-center justify-center gap-0.5 rounded-r-2xl"
+            style={{
+              background: `oklch(from ${accentColor} l c h / 0.10)`,
+              borderLeft: '1px solid oklch(from var(--border) l c h / 0.6)',
+            }}
+          >
+            <span
+              className="text-3xl font-extrabold leading-none"
+              style={{ fontFamily: 'var(--font-manrope)', color: accentColor }}
+            >
+              {dateParts.day}
+            </span>
+            <span
+              className="text-[11px] font-semibold uppercase tracking-wide leading-none"
+              style={{ fontFamily: 'var(--font-inter)', color: accentColor }}
+            >
+              {dateParts.month}
+            </span>
+            <span
+              className="text-[10px] uppercase tracking-wide leading-none mt-0.5"
+              style={{ fontFamily: 'var(--font-inter)', color: `oklch(from ${accentColor} l c h / 0.65)` }}
+            >
+              {dateParts.weekday}
+            </span>
+          </div>
+        )}
       </div>
 
       {confirmDelete && (
