@@ -42,6 +42,7 @@ export default async function CalendarPage() {
         <Sidebar
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
+          userId={user!.id}
           isOwner={isOwner}
           filter="calendar"
         />
@@ -71,6 +72,7 @@ export default async function CalendarPage() {
       <Suspense>
         <BottomNav
           userEmail={user!.email ?? ''}
+          userId={user!.id}
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
           remindersCount={reminders.length}

@@ -3,6 +3,7 @@
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { logout } from '@/app/login/actions'
+import { deleteWorkspace } from '@/app/(app)/workspace-actions'
 import { TaskModal } from '@/components/tasks/TaskModal'
 import { ReminderModal } from '@/components/tasks/ReminderModal'
 import type { Workspace } from '@/types'
@@ -56,12 +57,13 @@ function ProfileIcon({ filled }: { filled?: boolean }) {
 
 interface Props {
   userEmail: string
+  userId: string
   workspaces: Workspace[]
   activeWorkspaceId: string
   remindersCount: number
 }
 
-export function BottomNav({ userEmail, workspaces, activeWorkspaceId, remindersCount }: Props) {
+export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, remindersCount }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -70,9 +72,21 @@ export function BottomNav({ userEmail, workspaces, activeWorkspaceId, remindersC
   const [fabExpanded, setFabExpanded] = useState(false)
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [showReminderModal, setShowReminderModal] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId)
   const isCalendar = pathname === '/calendar'
+  const ownedWorkspaces = workspaces.filter(w => w.created_by === userId)
+
+  async function handleDeleteWorkspace(id: string) {
+    setDeleting(true)
+    await deleteWorkspace(id)
+    setDeleting(false)
+    setConfirmDeleteId(null)
+    setShowProfile(false)
+    router.push('/')
+  }
 
   function navigate(f: string) {
     router.push(`/?filter=${f}`)
@@ -253,6 +267,64 @@ export function BottomNav({ userEmail, workspaces, activeWorkspaceId, remindersC
                 {userEmail}
               </p>
             </div>
+
+            {ownedWorkspaces.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground uppercase tracking-widest" style={{ fontFamily: 'var(--font-inter)' }}>
+                  Mis workspaces
+                </p>
+                <div className="space-y-1">
+                  {ownedWorkspaces.map(ws => (
+                    <div key={ws.id}>
+                      {confirmDeleteId === ws.id ? (
+                        <div className="rounded-xl px-3 py-2.5 space-y-2" style={{ background: 'oklch(from var(--destructive) l c h / 0.08)', border: '1px solid oklch(from var(--destructive) l c h / 0.2)' }}>
+                          <p className="text-xs font-medium" style={{ fontFamily: 'var(--font-inter)', color: 'var(--destructive)' }}>
+                            ¿Eliminar &quot;{ws.name}&quot;? Esta acción no se puede deshacer.
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              disabled={deleting}
+                              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                              style={{ fontFamily: 'var(--font-inter)', background: 'var(--muted)', color: 'var(--foreground)' }}
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              onClick={() => handleDeleteWorkspace(ws.id)}
+                              disabled={deleting}
+                              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                              style={{ background: 'var(--destructive)', color: '#fff', fontFamily: 'var(--font-inter)', opacity: deleting ? 0.6 : 1 }}
+                            >
+                              {deleting ? 'Eliminando…' : 'Eliminar'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between px-3 py-2 rounded-xl transition-colors" style={{ background: 'var(--muted)' }}>
+                          <span className="text-sm font-medium truncate flex-1" style={{ fontFamily: 'var(--font-inter)' }}>
+                            {ws.name}
+                          </span>
+                          <button
+                            onClick={() => setConfirmDeleteId(ws.id)}
+                            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-destructive/10"
+                            style={{ color: 'var(--destructive)' }}
+                            title="Eliminar workspace"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                              <path d="M10 11v6M14 11v6" />
+                              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <form action={logout} className="pt-2">
               <button

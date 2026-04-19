@@ -54,6 +54,7 @@ export default async function HomePage({ searchParams }: Props) {
         <Sidebar
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
+          userId={user!.id}
           isOwner={isOwner}
           filter={filter}
         />
@@ -104,6 +105,7 @@ export default async function HomePage({ searchParams }: Props) {
       <Suspense>
         <BottomNav
           userEmail={user!.email ?? ''}
+          userId={user!.id}
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
           remindersCount={reminders.length}
