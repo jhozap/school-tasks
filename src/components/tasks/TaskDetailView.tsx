@@ -417,7 +417,7 @@ export function TaskDetailView({ task, userId, workspaceId, initialEdit = false 
                     </div>
 
                     {/* Action overlay */}
-                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-2 right-2 flex gap-1">
                       {!editMode && a.signedUrl && (
                         <button
                           onClick={() => downloadBlob(a.signedUrl!, a.file_name)}
@@ -489,7 +489,7 @@ export function TaskDetailView({ task, userId, workspaceId, initialEdit = false 
                     {editMode && isOwner && (
                       <button
                         onClick={() => setDeleteConfirm(a)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-muted"
+                        className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-muted"
                         style={{ color: 'var(--destructive)' }}
                         title="Eliminar enlace"
                       >
@@ -528,7 +528,7 @@ export function TaskDetailView({ task, userId, workspaceId, initialEdit = false 
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" style={{ fontFamily: 'var(--font-inter)' }}>{a.file_name}</p>
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1">
                       {!editMode && a.signedUrl && (
                         <button
                           onClick={() => downloadBlob(a.signedUrl!, a.file_name)}
