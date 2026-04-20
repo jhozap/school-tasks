@@ -27,7 +27,7 @@ export default async function CalendarPage() {
   return (
     <div className="lg:flex lg:h-screen lg:overflow-hidden">
       <Suspense fallback={<AppShellSkeleton showTaskSkeleton={false} />}>
-        <AppShell user={user!} workspaceId={workspaceId} mobileTitle="Calendario">
+        <AppShell user={user!} workspaceId={workspaceId} mobileTitle="Calendario" activeNav="calendar">
           <Suspense fallback={<CalendarSkeleton />}>
             <CalendarFeed workspaceId={workspaceId ?? ''} />
           </Suspense>

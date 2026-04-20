@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Sidebar } from './Sidebar'
+import { Sidebar, type ActiveNav } from './Sidebar'
 import { TopBar } from './TopBar'
 import { BottomNav } from './BottomNav'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
@@ -15,9 +15,10 @@ interface Props {
   workspaceId: string | null
   children: React.ReactNode
   mobileTitle?: string
+  activeNav?: ActiveNav
 }
 
-export async function AppShell({ user, workspaceId, children, mobileTitle }: Props) {
+export async function AppShell({ user, workspaceId, children, mobileTitle, activeNav = 'all' }: Props) {
   const supabase = await createClient()
 
   const [wsData, remindersRes, countRes] = await Promise.all([
@@ -48,6 +49,7 @@ export async function AppShell({ user, workspaceId, children, mobileTitle }: Pro
         activeWorkspaceId={workspaceId ?? ''}
         userId={user.id}
         isOwner={isOwner}
+        activeNav={activeNav}
       />
 
       <div className="flex-1 flex flex-col min-w-0 lg:overflow-y-auto">
