@@ -4,10 +4,12 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import { useState, useTransition, useEffect } from 'react'
 import { logout } from '@/app/login/actions'
 import { deleteWorkspace } from '@/app/(app)/workspace-actions'
-import { TaskModal } from '@/components/tasks/TaskModal'
-import { ReminderModal } from '@/components/tasks/ReminderModal'
+import dynamic from 'next/dynamic'
 import { WorkspaceDeleteConfirm } from './WorkspaceDeleteConfirm'
 import type { Workspace } from '@/types'
+
+const TaskModal = dynamic(() => import('@/components/tasks/TaskModal').then(m => m.TaskModal))
+const ReminderModal = dynamic(() => import('@/components/tasks/ReminderModal').then(m => m.ReminderModal))
 
 function HomeIcon({ filled }: { filled?: boolean }) {
   return filled ? (

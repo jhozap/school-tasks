@@ -21,6 +21,7 @@ export async function addAttachmentRecord(
 
   if (error) return { error: 'Error al guardar el archivo' }
   revalidatePath('/')
+  revalidatePath(`/tasks/${taskId}`)
   return { id: data.id as string }
 }
 
@@ -39,6 +40,7 @@ export async function addLinkAttachment(taskId: string, url: string, label: stri
 
   if (error) return { error: 'Error al guardar el enlace' }
   revalidatePath('/')
+  revalidatePath(`/tasks/${taskId}`)
   return { id: data.id as string }
 }
 
@@ -54,4 +56,5 @@ export async function deleteAttachment(attachmentId: string, storagePath: string
   const { error } = await supabase.from('attachments').delete().eq('id', attachmentId)
   if (error) return { error: 'Error al eliminar el archivo' }
   revalidatePath('/')
+  revalidatePath('/tasks/[id]', 'page')
 }

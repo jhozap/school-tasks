@@ -3,11 +3,13 @@
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
-import { TaskModal } from '@/components/tasks/TaskModal'
-import { ReminderModal } from '@/components/tasks/ReminderModal'
+import dynamic from 'next/dynamic'
 import { deleteWorkspace } from '@/app/(app)/workspace-actions'
 import { WorkspaceDeleteConfirm } from './WorkspaceDeleteConfirm'
 import type { Workspace } from '@/types'
+
+const TaskModal = dynamic(() => import('@/components/tasks/TaskModal').then(m => m.TaskModal))
+const ReminderModal = dynamic(() => import('@/components/tasks/ReminderModal').then(m => m.ReminderModal))
 
 function DashboardIcon({ filled }: { filled?: boolean }) {
   return (

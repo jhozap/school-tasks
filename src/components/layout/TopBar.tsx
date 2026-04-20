@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { logout } from '@/app/login/actions'
 import { ThemeToggle } from './ThemeToggle'
 import { NotificationBell } from './NotificationBell'
+import Image from 'next/image'
 import type { Reminder } from '@/types'
 
 interface Props {
@@ -64,11 +65,11 @@ export function TopBar({ userEmail, userName, avatarUrl, pendingCount, reminders
             style={{ fontFamily: 'var(--font-inter)' }}
           >
             {avatarUrl ? (
-              <img
+              <Image
                 src={avatarUrl}
                 alt={displayName}
-                loading="lazy"
-                decoding="async"
+                width={28}
+                height={28}
                 className="w-7 h-7 rounded-full object-cover flex-shrink-0"
               />
             ) : (
@@ -110,7 +111,7 @@ export function TopBar({ userEmail, userName, avatarUrl, pendingCount, reminders
               >
                 <div className="flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt={displayName} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                    <Image src={avatarUrl} alt={displayName} width={36} height={36} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                   ) : (
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"

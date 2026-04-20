@@ -41,6 +41,7 @@ export async function createTask(formData: FormData) {
 
   if (error) return { error: 'Error al crear la tarea' }
   revalidatePath('/')
+  revalidatePath('/calendar')
 }
 
 export async function updateTask(id: string, formData: FormData) {
@@ -60,6 +61,7 @@ export async function updateTask(id: string, formData: FormData) {
 
   if (error) return { error: 'Error al actualizar la tarea' }
   revalidatePath('/')
+  revalidatePath('/calendar')
 }
 
 export async function toggleTask(id: string, status: 'pending' | 'completed') {
@@ -75,6 +77,7 @@ export async function toggleTask(id: string, status: 'pending' | 'completed') {
 
   if (error) return { error: 'Error al actualizar la tarea' }
   revalidatePath('/')
+  revalidatePath('/calendar')
 }
 
 export async function deleteTask(id: string) {
@@ -88,4 +91,5 @@ export async function deleteTask(id: string) {
 
   if (error) return { error: 'Error al eliminar la tarea' }
   revalidatePath('/')
+  revalidatePath('/calendar')
 }
