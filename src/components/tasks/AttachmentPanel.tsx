@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { addAttachmentRecord, addLinkAttachment, deleteAttachment } from '@/app/(app)/attachment-actions'
 import type { Attachment } from '@/types'
@@ -159,10 +160,12 @@ export function AttachmentPanel({ attachments, taskId, workspaceId, isOwner }: P
                 <>
                   {a.signedUrl ? (
                     <a href={a.signedUrl} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
-                      <img
+                      <Image
                         src={a.signedUrl}
                         alt={a.file_name}
-                        className="w-8 h-8 rounded-lg object-cover"
+                        width={32}
+                        height={32}
+                        className="rounded-lg object-cover"
                       />
                     </a>
                   ) : (
