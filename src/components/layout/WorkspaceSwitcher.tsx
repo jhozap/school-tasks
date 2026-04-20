@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { createWorkspace, switchWorkspace, createInvitation } from '@/app/(app)/workspace-actions'
+import { createWorkspace, switchWorkspace, createInvitation, leaveWorkspace } from '@/app/(app)/workspace-actions'
 import type { Workspace } from '@/types'
 
 interface Props {
   workspaces: Workspace[]
   activeWorkspaceId: string
   isOwner: boolean
+  userId: string
 }
 
 function ChevronIcon() {
@@ -38,7 +39,7 @@ function UserPlusIcon() {
   )
 }
 
-export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Props) {
+export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner, userId }: Props) {
   const [open, setOpen] = useState(false)
   const [showNewForm, setShowNewForm] = useState(false)
   const [newName, setNewName] = useState('')
@@ -46,6 +47,8 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Pr
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
   const [inviteLoading, setInviteLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [confirmLeaveId, setConfirmLeaveId] = useState<string | null>(null)
+  const [leaving, setLeaving] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   const active = workspaces.find(w => w.id === activeWorkspaceId) ?? workspaces[0]
@@ -75,6 +78,14 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Pr
     setNewName('')
     setCreating(false)
     setShowNewForm(false)
+    setOpen(false)
+  }
+
+  async function handleLeave(id: string) {
+    setLeaving(true)
+    await leaveWorkspace(id)
+    setLeaving(false)
+    setConfirmLeaveId(null)
     setOpen(false)
   }
 
@@ -115,19 +126,76 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner }: Pr
           }}
         >
           <div className="p-2 space-y-0.5">
-            {workspaces.map(ws => (
-              <button
-                key={ws.id}
-                onClick={() => handleSwitch(ws.id)}
-                className="w-full text-left px-3 py-2.5 rounded-xl text-sm transition-colors hover:bg-muted flex items-center justify-between"
-                style={{ fontFamily: 'var(--font-inter)' }}
-              >
-                <span className="truncate">{ws.name}</span>
-                {ws.id === activeWorkspaceId && (
-                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--chart-3)' }} />
-                )}
-              </button>
-            ))}
+            {workspaces.map(ws => {
+              const isMember = ws.created_by !== userId
+              if (confirmLeaveId === ws.id) {
+                return (
+                  <div
+                    key={ws.id}
+                    className="rounded-xl px-3 py-2.5 space-y-2"
+                    style={{
+                      background: 'oklch(from var(--destructive) l c h / 0.08)',
+                      border: '1px solid oklch(from var(--destructive) l c h / 0.2)',
+                    }}
+                  >
+                    <p className="text-xs font-medium leading-snug" style={{ color: 'var(--destructive)', fontFamily: 'var(--font-inter)' }}>
+                      ¿Abandonar &quot;{ws.name}&quot;?
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setConfirmLeaveId(null)}
+                        disabled={leaving}
+                        className="flex-1 py-1.5 rounded-lg text-xs font-semibold"
+                        style={{ fontFamily: 'var(--font-inter)', background: 'var(--muted)', color: 'var(--foreground)' }}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={() => handleLeave(ws.id)}
+                        disabled={leaving}
+                        className="flex-1 py-1.5 rounded-lg text-xs font-semibold"
+                        style={{
+                          background: 'var(--destructive)',
+                          color: '#fff',
+                          fontFamily: 'var(--font-inter)',
+                          opacity: leaving ? 0.6 : 1,
+                        }}
+                      >
+                        {leaving ? 'Saliendo…' : 'Abandonar'}
+                      </button>
+                    </div>
+                  </div>
+                )
+              }
+              return (
+                <div key={ws.id} className="flex items-center gap-1 group">
+                  <button
+                    onClick={() => handleSwitch(ws.id)}
+                    className="flex-1 text-left px-3 py-2.5 rounded-xl text-sm transition-colors hover:bg-muted flex items-center justify-between"
+                    style={{ fontFamily: 'var(--font-inter)' }}
+                  >
+                    <span className="truncate">{ws.name}</span>
+                    {ws.id === activeWorkspaceId && (
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--chart-3)' }} />
+                    )}
+                  </button>
+                  {isMember && (
+                    <button
+                      onClick={() => setConfirmLeaveId(ws.id)}
+                      className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
+                      style={{ color: 'var(--muted-foreground)' }}
+                      title="Abandonar workspace"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           <div className="border-t mx-2" style={{ borderColor: 'var(--border)' }} />

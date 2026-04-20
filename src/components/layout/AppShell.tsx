@@ -76,6 +76,7 @@ export async function AppShell({ user, workspaceId, children, mobileTitle, activ
                   workspaces={workspaces}
                   activeWorkspaceId={workspaceId ?? ''}
                   isOwner={isOwner}
+                  userId={user.id}
                 />
               </div>
               <div className="flex items-center gap-2">
