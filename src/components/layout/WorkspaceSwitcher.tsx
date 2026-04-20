@@ -182,7 +182,7 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId, isOwner, user
                   {isMember && (
                     <button
                       onClick={() => setConfirmLeaveId(ws.id)}
-                      className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
+                      className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-muted"
                       style={{ color: 'var(--muted-foreground)' }}
                       title="Abandonar workspace"
                     >
