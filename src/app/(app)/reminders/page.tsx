@@ -25,7 +25,7 @@ export default async function RemindersPage() {
     <>
       <div className="lg:flex lg:h-screen lg:overflow-hidden">
         <Suspense fallback={<AppShellSkeleton showTaskSkeleton={false} />}>
-          <AppShell user={user!} workspaceId={workspaceId} mobileTitle="Recordatorios">
+          <AppShell user={user!} workspaceId={workspaceId} mobileTitle="Recordatorios" activeNav="reminders">
             <Suspense fallback={<RemindersSkeleton />}>
               <RemindersFeed workspaceId={workspaceId ?? ''} />
             </Suspense>
