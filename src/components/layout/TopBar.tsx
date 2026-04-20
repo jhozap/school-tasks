@@ -15,12 +15,11 @@ interface Props {
   userEmail: string
   userName: string
   avatarUrl: string
-  pendingCount: number
   reminders: Reminder[]
   activeNav: ActiveNav
 }
 
-export function TopBar({ userEmail, userName, avatarUrl, pendingCount, reminders, activeNav }: Props) {
+export function TopBar({ userEmail, userName, avatarUrl, reminders, activeNav }: Props) {
   const title = titleMap[activeNav]
 
   return (
@@ -28,17 +27,12 @@ export function TopBar({ userEmail, userName, avatarUrl, pendingCount, reminders
       className="hidden lg:flex items-center justify-between px-8 py-4 sticky top-0 z-30"
       style={{ background: 'var(--background)', borderBottom: '1px solid var(--border)' }}
     >
-      <div className="space-y-0.5">
-        <h2
-          className="text-lg font-extrabold tracking-tight"
-          style={{ fontFamily: 'var(--font-manrope)' }}
-        >
-          {title}
-        </h2>
-        <p className="text-xs text-muted-foreground" style={{ fontFamily: 'var(--font-inter)' }}>
-          {pendingCount} pendientes
-        </p>
-      </div>
+      <h2
+        className="text-lg font-extrabold tracking-tight"
+        style={{ fontFamily: 'var(--font-manrope)' }}
+      >
+        {title}
+      </h2>
 
       <div className="flex items-center gap-3">
         <ThemeToggle />
