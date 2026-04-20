@@ -9,8 +9,6 @@ import { CalendarView } from '@/components/calendar/CalendarView'
 import { Suspense } from 'react'
 import type { Task, Reminder, Workspace } from '@/types'
 
-export const runtime = 'edge'
-
 export default async function CalendarPage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()])
 
