@@ -3,6 +3,7 @@ import { Manrope, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { PwaRegister } from "@/components/PwaRegister";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -53,6 +54,7 @@ export default function RootLayout({
         <Providers>{children}</Providers>
         <PwaRegister />
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
