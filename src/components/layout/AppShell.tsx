@@ -59,6 +59,7 @@ export async function AppShell({ user, workspaceId, children, mobileTitle, activ
           avatarUrl={user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? ''}
           pendingCount={pendingCount}
           reminders={reminders}
+          activeNav={activeNav}
         />
 
         <main className="flex-1 px-4 py-8 max-w-2xl mx-auto w-full pb-28 lg:pb-10">
