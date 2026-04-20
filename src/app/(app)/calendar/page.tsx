@@ -8,7 +8,7 @@ import { Suspense } from 'react'
 
 function CalendarSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-h-[420px]">
       <div className="h-10 rounded-xl bg-muted animate-pulse" />
       <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: 35 }).map((_, i) => (
