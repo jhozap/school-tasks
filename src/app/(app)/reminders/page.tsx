@@ -8,7 +8,7 @@ import { Suspense } from 'react'
 
 function RemindersSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 min-h-[264px]">
       {[1, 2, 3].map(i => (
         <div key={i} className="h-20 rounded-2xl bg-muted animate-pulse" />
       ))}
