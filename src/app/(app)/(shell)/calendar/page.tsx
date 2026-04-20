@@ -1,8 +1,6 @@
 import { getUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspaceId } from '@/lib/workspace'
-import { AppShell } from '@/components/layout/AppShell'
-import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton'
 import { CalendarFeed } from '@/components/calendar/CalendarFeed'
 import { Suspense } from 'react'
 
@@ -25,14 +23,8 @@ export default async function CalendarPage() {
   const workspaceId = await getActiveWorkspaceId(supabase, user!.id)
 
   return (
-    <div className="lg:flex lg:h-screen lg:overflow-hidden">
-      <Suspense fallback={<AppShellSkeleton showTaskSkeleton={false} />}>
-        <AppShell user={user!} workspaceId={workspaceId} mobileTitle="Calendario" activeNav="calendar">
-          <Suspense fallback={<CalendarSkeleton />}>
-            <CalendarFeed workspaceId={workspaceId ?? ''} />
-          </Suspense>
-        </AppShell>
-      </Suspense>
-    </div>
+    <Suspense fallback={<CalendarSkeleton />}>
+      <CalendarFeed workspaceId={workspaceId ?? ''} />
+    </Suspense>
   )
 }

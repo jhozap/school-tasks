@@ -14,21 +14,17 @@ interface Props {
   user: User
   workspaceId: string | null
   children: React.ReactNode
-  mobileTitle?: string
   activeNav?: ActiveNav
 }
 
-export async function AppShell({ user, workspaceId, children, mobileTitle, activeNav = 'all' }: Props) {
+export async function AppShell({ user, workspaceId, children, activeNav = 'all' }: Props) {
   const supabase = await createClient()
 
-  const [wsData, remindersRes, countRes] = await Promise.all([
+  const [wsData, remindersRes] = await Promise.all([
     supabase.from('workspace_users').select('workspaces(*)').eq('user_id', user.id),
     workspaceId
       ? supabase.from('reminders').select('*').eq('workspace_id', workspaceId).order('remind_at', { ascending: true })
       : Promise.resolve({ data: [] }),
-    workspaceId
-      ? supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId).eq('status', 'pending')
-      : Promise.resolve({ count: 0 }),
   ])
 
   const workspaces: Workspace[] = ((wsData.data ?? []) as { workspaces: unknown }[])
@@ -38,7 +34,6 @@ export async function AppShell({ user, workspaceId, children, mobileTitle, activ
   if (workspaces.length === 0) redirect('/onboarding')
 
   const reminders = (remindersRes.data as Reminder[]) ?? []
-  const pendingCount = (countRes as { count: number | null }).count ?? 0
   const activeWorkspace = workspaces.find(w => w.id === workspaceId)
   const isOwner = activeWorkspace?.created_by === user.id
 
@@ -57,16 +52,15 @@ export async function AppShell({ user, workspaceId, children, mobileTitle, activ
           userEmail={user.email ?? ''}
           userName={user.user_metadata?.full_name ?? user.user_metadata?.name ?? ''}
           avatarUrl={user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? ''}
-          pendingCount={pendingCount}
           reminders={reminders}
           activeNav={activeNav}
         />
 
         <main className="flex-1 px-4 py-8 max-w-2xl mx-auto w-full pb-28 lg:pb-10">
-          {mobileTitle ? (
+          {activeNav === 'calendar' || activeNav === 'reminders' ? (
             <header className="lg:hidden mb-8">
               <h1 className="text-2xl font-extrabold tracking-tight" style={{ fontFamily: 'var(--font-manrope)' }}>
-                {mobileTitle}
+                {activeNav === 'calendar' ? 'Calendario' : 'Recordatorios'}
               </h1>
             </header>
           ) : (
