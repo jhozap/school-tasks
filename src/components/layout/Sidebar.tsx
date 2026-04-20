@@ -64,6 +64,7 @@ interface Props {
 
 export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, activeNav }: Props) {
   const ownedWorkspaces = workspaces.filter(w => w.created_by === userId)
+  const memberWorkspaces = workspaces.filter(w => w.created_by !== userId)
 
   return (
     <aside
@@ -83,6 +84,7 @@ export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, active
           workspaces={workspaces}
           activeWorkspaceId={activeWorkspaceId}
           isOwner={isOwner}
+          userId={userId}
         />
       </div>
 
@@ -109,9 +111,12 @@ export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, active
         })}
       </nav>
 
-      {/* Owned workspaces — delete section */}
-      {ownedWorkspaces.length > 0 && (
-        <SidebarWorkspaceList workspaces={ownedWorkspaces} />
+      {/* Workspace management — delete owned, leave member */}
+      {(ownedWorkspaces.length > 0 || memberWorkspaces.length > 0) && (
+        <SidebarWorkspaceList
+          ownedWorkspaces={ownedWorkspaces}
+          memberWorkspaces={memberWorkspaces}
+        />
       )}
 
       {/* Footer — expandable create button */}

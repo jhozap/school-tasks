@@ -98,6 +98,36 @@ export async function deleteWorkspace(workspaceId: string) {
   return {}
 }
 
+export async function leaveWorkspace(workspaceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { data: ws } = await supabase
+    .from('workspaces')
+    .select('created_by')
+    .eq('id', workspaceId)
+    .single()
+  if (ws?.created_by === user.id) return { error: 'El dueño no puede abandonar el workspace' }
+
+  const { error } = await supabase
+    .from('workspace_users')
+    .delete()
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', user.id)
+  if (error) return { error: error.message }
+
+  const cookieStore = await cookies()
+  if (cookieStore.get('active_workspace_id')?.value === workspaceId) {
+    await clearActiveWorkspaceCookie()
+  }
+
+  revalidatePath('/')
+  revalidatePath('/calendar')
+  revalidatePath('/reminders')
+  return {}
+}
+
 export async function createInvitation(workspaceId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
