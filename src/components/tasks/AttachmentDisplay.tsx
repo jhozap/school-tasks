@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { ResolvedAttachment } from '@/types'
 
 interface Props {
@@ -26,13 +27,13 @@ export function AttachmentDisplay({
               <div key={a.id} className="relative group">
                 <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
                   {a.signedUrl ? (
-                    <button className="w-full h-full block" onClick={() => onLightbox(a.signedUrl!)}>
-                      <img
+                    <button className="relative w-full h-full block" onClick={() => onLightbox(a.signedUrl!)}>
+                      <Image
                         src={a.signedUrl}
                         alt={a.file_name}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        fill
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                        className="object-cover transition-transform group-hover:scale-105"
                       />
                     </button>
                   ) : (

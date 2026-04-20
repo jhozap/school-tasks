@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { ResolvedAttachment } from '@/types'
 
 interface Props {
@@ -27,12 +28,19 @@ export function TaskDetailModals({
           onClick={onCloseLightbox}
           style={{ backdropFilter: 'blur(8px)' }}
         >
-          <img
-            src={lightboxSrc}
-            decoding="async"
-            className="max-w-full max-h-full rounded-2xl object-contain"
+          <div
+            className="relative rounded-2xl overflow-hidden"
+            style={{ width: '90vw', height: '90vh', maxWidth: '1200px' }}
             onClick={e => e.stopPropagation()}
-          />
+          >
+            <Image
+              src={lightboxSrc}
+              alt="Vista ampliada"
+              fill
+              sizes="90vw"
+              className="object-contain"
+            />
+          </div>
           <button
             onClick={onCloseLightbox}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center"
