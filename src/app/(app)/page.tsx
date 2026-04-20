@@ -14,6 +14,8 @@ import { redirect } from 'next/navigation'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import type { Workspace, Reminder } from '@/types'
 
+export const runtime = 'edge'
+
 export default async function HomePage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()])
 

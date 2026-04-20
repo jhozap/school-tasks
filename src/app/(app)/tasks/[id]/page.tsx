@@ -5,6 +5,8 @@ import { getActiveWorkspaceId } from '@/lib/workspace'
 import { TaskDetailView } from '@/components/tasks/TaskDetailView'
 import type { TaskWithAttachments } from '@/types'
 
+export const runtime = 'edge'
+
 interface Props {
   params: Promise<{ id: string }>
   searchParams: Promise<{ edit?: string }>

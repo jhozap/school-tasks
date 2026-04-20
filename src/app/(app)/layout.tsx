@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { getUser } from '@/lib/auth'
 
+export const runtime = 'edge'
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser()
 

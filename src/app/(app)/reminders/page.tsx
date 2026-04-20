@@ -9,6 +9,8 @@ import { RemindersView } from '@/components/reminders/RemindersView'
 import { Suspense } from 'react'
 import type { Reminder, Workspace } from '@/types'
 
+export const runtime = 'edge'
+
 export default async function RemindersPage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()])
 
