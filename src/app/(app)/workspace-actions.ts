@@ -32,6 +32,8 @@ export async function createWorkspace(name: string) {
 
   await setActiveWorkspaceCookie(ws.id)
   revalidatePath('/')
+  revalidatePath('/calendar')
+  revalidatePath('/reminders')
 }
 
 export async function switchWorkspace(workspaceId: string) {
@@ -50,6 +52,8 @@ export async function switchWorkspace(workspaceId: string) {
 
   await setActiveWorkspaceCookie(workspaceId)
   revalidatePath('/')
+  revalidatePath('/calendar')
+  revalidatePath('/reminders')
 }
 
 export async function deleteWorkspace(workspaceId: string) {
@@ -89,6 +93,8 @@ export async function deleteWorkspace(workspaceId: string) {
   }
 
   revalidatePath('/')
+  revalidatePath('/calendar')
+  revalidatePath('/reminders')
   return {}
 }
 
