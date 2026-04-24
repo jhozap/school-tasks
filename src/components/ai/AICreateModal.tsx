@@ -6,7 +6,10 @@ import { AIImageCapture } from './AIImageCapture'
 import { AIAudioCapture } from './AIAudioCapture'
 import type { ExtractedFields } from '@/app/api/ai/analyze/schema'
 
+const DAILY_LIMIT = 10
 const ANALYZING_MESSAGES = ['Analizando contenido...', 'Extrayendo información...', 'Casi listo...']
+
+interface Usage { image_count: number; audio_count: number }
 
 interface Props {
   onExtracted: (fields: ExtractedFields) => void
@@ -18,6 +21,7 @@ export function AICreateModal({ onExtracted, onClose }: Props) {
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [msgIdx, setMsgIdx] = useState(0)
+  const [usage, setUsage] = useState<Usage | null>(null)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -33,6 +37,18 @@ export function AICreateModal({ onExtracted, onClose }: Props) {
     return () => clearInterval(id)
   }, [analyzing])
 
+  useEffect(() => {
+    fetch('/api/ai/usage')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setUsage(d))
+  }, [])
+
+  function refreshUsage() {
+    fetch('/api/ai/usage')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setUsage(d))
+  }
+
   function handleExtracted(fields: ExtractedFields) {
     onClose()
     onExtracted(fields)
@@ -41,7 +57,14 @@ export function AICreateModal({ onExtracted, onClose }: Props) {
   function handleError(msg: string) {
     setError(msg)
     setAnalyzing(false)
+    refreshUsage()
   }
+
+  const remaining = usage
+    ? { image: Math.max(0, DAILY_LIMIT - usage.image_count), audio: Math.max(0, DAILY_LIMIT - usage.audio_count) }
+    : null
+
+  const exhausted = remaining ? remaining[tab] === 0 : false
 
   const content = (
     <div
@@ -66,7 +89,7 @@ export function AICreateModal({ onExtracted, onClose }: Props) {
         </div>
 
         {/* Tab selector */}
-        <div className="flex rounded-xl overflow-hidden mb-5" style={{ background: 'var(--muted)' }}>
+        <div className="flex rounded-xl overflow-hidden mb-3" style={{ background: 'var(--muted)' }}>
           {(['image', 'audio'] as const).map(t => (
             <button
               key={t}
@@ -84,6 +107,29 @@ export function AICreateModal({ onExtracted, onClose }: Props) {
           ))}
         </div>
 
+        {/* Daily usage counters */}
+        {remaining && (
+          <div className="flex items-center justify-center gap-3 mb-4">
+            {(['image', 'audio'] as const).map(t => {
+              const count = remaining[t]
+              const isEmpty = count === 0
+              return (
+                <span
+                  key={t}
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{
+                    fontFamily: 'var(--font-inter)',
+                    background: isEmpty ? 'oklch(0.96 0.01 25)' : 'var(--muted)',
+                    color: isEmpty ? 'var(--destructive)' : 'var(--muted-foreground)',
+                  }}
+                >
+                  {t === 'image' ? 'Imágenes' : 'Audios'}: {count}/{DAILY_LIMIT}
+                </span>
+              )
+            })}
+          </div>
+        )}
+
         {analyzing ? (
           <div className="flex flex-col items-center gap-3 py-10">
             <div
@@ -96,6 +142,17 @@ export function AICreateModal({ onExtracted, onClose }: Props) {
             />
             <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-inter)' }}>
               {ANALYZING_MESSAGES[msgIdx]}
+            </p>
+          </div>
+        ) : exhausted ? (
+          <div className="flex flex-col items-center gap-2 py-8 text-center">
+            <span className="text-2xl">⏳</span>
+            <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-inter)' }}>
+              Límite diario alcanzado
+            </p>
+            <p className="text-xs" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-inter)' }}>
+              Usaste los {DAILY_LIMIT} análisis de {tab === 'image' ? 'imágenes' : 'audios'} de hoy.
+              <br />Vuelve mañana o cambia al otro modo.
             </p>
           </div>
         ) : (
