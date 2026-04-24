@@ -2,6 +2,7 @@
 
 import { useState, useOptimistic, useTransition } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { toggleTask, deleteTask } from '@/app/(app)/actions'
 import type { TaskWithAttachments } from '@/types'
 import { getDiffDays, formatDateParts, getTaskAccentColor } from '@/lib/dates'
@@ -106,6 +107,7 @@ function AttachmentBadges({ attachments }: { attachments: TaskWithAttachments['a
 }
 
 export function TaskCard({ task, workspaceId, userId }: Props) {
+  const router = useRouter()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -124,7 +126,8 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
     const next = task.status === 'pending' ? 'completed' : 'pending'
     startTransition(async () => {
       setOptimisticStatus(next)
-      await toggleTask(task.id, task.status)
+      const result = await toggleTask(task.id, task.status)
+      if (result?.error) setOptimisticStatus(task.status)
     })
   }
 
@@ -145,22 +148,34 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
 
   return (
     <>
-      <Link
-        href={`/tasks/${task.id}`}
-        className="bg-card rounded-2xl flex overflow-hidden cursor-pointer group transition-shadow hover:shadow-md"
+      {/* Wrapper: relative so the absolute Link sits behind content */}
+      <div
+        className="relative bg-card rounded-2xl flex overflow-hidden group transition-shadow hover:shadow-md"
         style={{ boxShadow: '0 2px 16px oklch(0.05 0 0 / 8%)' }}
       >
-        {/* Accent bar */}
-        <div className="w-1 flex-shrink-0 rounded-l-2xl" style={{ background: accentColor }} />
+        {/* Full-card link — z-0, behind content; handles navigation + prefetch */}
+        <Link
+          href={`/tasks/${task.id}`}
+          className="absolute inset-0 z-0 rounded-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          aria-label={`Ver tarea: ${task.title}`}
+        />
 
-        {/* Main content */}
-        <div className="flex-1 px-4 pt-2.5 pb-3.5 min-w-0 space-y-2">
+        {/* Accent bar — z-10, pointer-events-none so clicks fall through to Link */}
+        <div
+          className="relative z-10 w-1 flex-shrink-0 rounded-l-2xl pointer-events-none"
+          style={{ background: accentColor }}
+        />
+
+        {/* Main content — z-10 */}
+        <div className="relative z-10 flex-1 px-4 pt-2.5 pb-3.5 min-w-0 space-y-2">
           {/* Top row: badge + menu */}
           <div className="flex items-center justify-between gap-2">
-            <StatusChip task={optimisticTask} />
+            <div className="pointer-events-none">
+              <StatusChip task={optimisticTask} />
+            </div>
 
             {isOwner && (
-              <div className="relative flex-shrink-0" onClick={e => e.stopPropagation()}>
+              <div className="relative flex-shrink-0">
                 <button
                   onClick={openMenu}
                   className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 hover:bg-muted"
@@ -174,15 +189,14 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
 
                 {menuOpen && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={e => { e.stopPropagation(); setMenuOpen(false) }} />
+                    <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
                     <div
                       className="absolute right-0 top-full mt-1 w-36 rounded-xl z-50 overflow-hidden shadow-lg"
                       style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-                      onClick={e => e.stopPropagation()}
                     >
                       <Link
                         href={`/tasks/${task.id}?edit=true`}
-                        onClick={e => { e.stopPropagation(); setMenuOpen(false) }}
+                        onClick={() => setMenuOpen(false)}
                         className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
                         style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}
                       >
@@ -193,7 +207,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
                         Editar
                       </Link>
                       <button
-                        onClick={e => { e.stopPropagation(); setMenuOpen(false); setConfirmDelete(true) }}
+                        onClick={() => { setMenuOpen(false); setConfirmDelete(true) }}
                         className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-muted text-left"
                         style={{ fontFamily: 'var(--font-inter)', color: 'var(--destructive)' }}
                       >
@@ -211,6 +225,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
 
           {/* Middle row: checkbox + title */}
           <div className="flex items-start gap-3">
+            {/* Toggle button — sits in z-10 layer, not a descendant of the Link */}
             <button
               onClick={handleToggle}
               className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
@@ -226,7 +241,8 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
                 </svg>
               )}
             </button>
-            <div className="flex-1 min-w-0">
+            {/* Text area — pointer-events-none so clicks fall through to Link */}
+            <div className="flex-1 min-w-0 pointer-events-none">
               <p
                 className="text-sm font-semibold leading-snug"
                 style={{
@@ -245,18 +261,18 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
             </div>
           </div>
 
-          {/* Bottom row: attachments */}
+          {/* Bottom row: attachments — pointer-events-none, clicks navigate */}
           {task.attachments?.length > 0 && (
-            <div className="pl-8">
+            <div className="pl-8 pointer-events-none">
               <AttachmentBadges attachments={task.attachments} />
             </div>
           )}
         </div>
 
-        {/* Date block — right column */}
+        {/* Date block — z-10, pointer-events-none so clicks navigate via Link */}
         {dateParts && (
           <div
-            className="flex-shrink-0 w-16 flex flex-col items-center justify-center gap-0.5 rounded-r-2xl"
+            className="relative z-10 flex-shrink-0 w-16 flex flex-col items-center justify-center gap-0.5 rounded-r-2xl pointer-events-none"
             style={{
               background: `oklch(from ${accentColor} l c h / 0.10)`,
               borderLeft: '1px solid oklch(from var(--border) l c h / 0.6)',
@@ -282,7 +298,7 @@ export function TaskCard({ task, workspaceId, userId }: Props) {
             </span>
           </div>
         )}
-      </Link>
+      </div>
 
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setConfirmDelete(false)}>

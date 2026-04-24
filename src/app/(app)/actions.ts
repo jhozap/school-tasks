@@ -69,13 +69,15 @@ export async function toggleTask(id: string, status: 'pending' | 'completed') {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { error } = await supabase
+  // Any workspace member can toggle — RLS "members can manage tasks" enforces scope.
+  // updateTask/deleteTask keep .eq('created_by') since only the owner edits content.
+  const { data, error } = await supabase
     .from('tasks')
     .update({ status: status === 'pending' ? 'completed' : 'pending' })
     .eq('id', id)
-    .eq('created_by', user.id)
+    .select('id')
 
-  if (error) return { error: 'Error al actualizar la tarea' }
+  if (error || !data?.length) return { error: 'No se pudo actualizar la tarea' }
   revalidatePath('/')
   revalidatePath('/calendar')
 }
