@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import { AppShell } from '@/components/layout/AppShell'
 import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton'
+import { PullToRefresh } from '@/components/PullToRefresh'
 import type { ActiveNav } from '@/components/layout/Sidebar'
 
 function computeActiveNav(pathname: string, search: string): ActiveNav {
@@ -30,7 +31,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
     <div className="lg:flex lg:h-screen lg:overflow-hidden">
       <Suspense fallback={<AppShellSkeleton />}>
         <AppShell user={user} workspaceId={workspaceId} activeNav={activeNav}>
-          {children}
+          <PullToRefresh>{children}</PullToRefresh>
         </AppShell>
       </Suspense>
     </div>
