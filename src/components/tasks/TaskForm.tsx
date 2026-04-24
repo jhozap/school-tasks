@@ -6,13 +6,15 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import type { Task } from '@/types'
+import type { TaskInitialValues } from './TaskModal'
 
 interface Props {
   task?: Task
+  initialValues?: TaskInitialValues
   onClose: () => void
 }
 
-export function TaskForm({ task, onClose }: Props) {
+export function TaskForm({ task, initialValues, onClose }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -40,7 +42,7 @@ export function TaskForm({ task, onClose }: Props) {
         <Input
           name="title"
           required
-          defaultValue={task?.title}
+          defaultValue={task?.title ?? initialValues?.title ?? ''}
           placeholder="¿Qué hay que hacer?"
           autoFocus
           className="bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary rounded-xl h-11"
@@ -54,7 +56,7 @@ export function TaskForm({ task, onClose }: Props) {
         </Label>
         <textarea
           name="description"
-          defaultValue={task?.description ?? ''}
+          defaultValue={task?.description ?? initialValues?.description ?? ''}
           placeholder="Detalles adicionales..."
           rows={3}
           className="w-full bg-muted border-0 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-none"
@@ -69,7 +71,7 @@ export function TaskForm({ task, onClose }: Props) {
         <Input
           name="due_date"
           type="date"
-          defaultValue={task?.due_date ?? ''}
+          defaultValue={task?.due_date ?? initialValues?.due_date ?? ''}
           className="bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary rounded-xl h-11"
           style={{ fontFamily: 'var(--font-inter)' }}
         />

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
+import type { TaskInitialValues } from '@/components/tasks/TaskModal'
 
 const TaskModal = dynamic(
   () => import('@/components/tasks/TaskModal').then(m => ({ default: m.TaskModal })),
@@ -13,10 +14,27 @@ const ReminderModal = dynamic(
   { ssr: false }
 )
 
-export function SidebarCreateButton() {
+const AICreateModal = dynamic(
+  () => import('@/components/ai/AICreateModal').then(m => ({ default: m.AICreateModal })),
+  { ssr: false }
+)
+
+const AIUpgradeBanner = dynamic(
+  () => import('@/components/ai/AIUpgradeBanner').then(m => ({ default: m.AIUpgradeBanner })),
+  { ssr: false }
+)
+
+interface Props {
+  isPaid: boolean
+}
+
+export function SidebarCreateButton({ isPaid }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [showReminderModal, setShowReminderModal] = useState(false)
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false)
+  const [taskInitialValues, setTaskInitialValues] = useState<TaskInitialValues | undefined>()
 
   function openTask() {
     setExpanded(false)
@@ -26,6 +44,12 @@ export function SidebarCreateButton() {
   function openReminder() {
     setExpanded(false)
     setShowReminderModal(true)
+  }
+
+  function openAI() {
+    setExpanded(false)
+    if (isPaid) setShowAIModal(true)
+    else setShowUpgradeBanner(true)
   }
 
   return (
@@ -76,6 +100,38 @@ export function SidebarCreateButton() {
                   <p className="text-xs text-muted-foreground">Recibir una alerta</p>
                 </div>
               </button>
+              <div style={{ height: '1px', background: 'var(--border)' }} />
+              <button
+                onClick={openAI}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-muted text-left"
+                style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)', opacity: isPaid ? 1 : 0.6 }}
+              >
+                <span
+                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: isPaid ? 'linear-gradient(135deg, #7c3aed33 0%, #4f46e533 100%)' : 'var(--muted)',
+                    color: isPaid ? '#7c3aed' : 'var(--muted-foreground)',
+                  }}
+                >
+                  {isPaid ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5Z" />
+                      <path d="M19 15l.8 2.4L22 18l-2.2.6L19 21l-.8-2.4L16 18l2.2-.6Z" />
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  )}
+                </span>
+                <div>
+                  <p className="font-medium text-sm">Crear con IA</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isPaid ? 'Desde imagen o audio' : 'Función premium'}
+                  </p>
+                </div>
+              </button>
             </div>
           </>
         )}
@@ -109,8 +165,23 @@ export function SidebarCreateButton() {
         </button>
       </div>
 
-      {showTaskModal && <TaskModal onClose={() => setShowTaskModal(false)} />}
+      {showTaskModal && (
+        <TaskModal
+          initialValues={taskInitialValues}
+          onClose={() => { setShowTaskModal(false); setTaskInitialValues(undefined) }}
+        />
+      )}
       {showReminderModal && <ReminderModal onClose={() => setShowReminderModal(false)} />}
+      {showAIModal && (
+        <AICreateModal
+          onClose={() => setShowAIModal(false)}
+          onExtracted={fields => {
+            setTaskInitialValues(fields)
+            setShowTaskModal(true)
+          }}
+        />
+      )}
+      {showUpgradeBanner && <AIUpgradeBanner onClose={() => setShowUpgradeBanner(false)} />}
     </>
   )
 }

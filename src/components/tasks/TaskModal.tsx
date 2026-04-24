@@ -4,12 +4,19 @@ import { useEffect } from 'react'
 import { TaskForm } from './TaskForm'
 import type { Task } from '@/types'
 
+export interface TaskInitialValues {
+  title?: string
+  description?: string | null
+  due_date?: string | null
+}
+
 interface Props {
   task?: Task
+  initialValues?: TaskInitialValues
   onClose: () => void
 }
 
-export function TaskModal({ task, onClose }: Props) {
+export function TaskModal({ task, initialValues, onClose }: Props) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -45,7 +52,7 @@ export function TaskModal({ task, onClose }: Props) {
             ✕
           </button>
         </div>
-        <TaskForm task={task} onClose={onClose} />
+        <TaskForm task={task} initialValues={initialValues} onClose={onClose} />
       </div>
     </div>
   )

@@ -7,6 +7,7 @@ import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { ThemeToggle } from './ThemeToggle'
 import { NotificationBell } from './NotificationBell'
 import { Suspense } from 'react'
+import { getIsPaid } from '@/lib/isPaid'
 import type { User } from '@supabase/supabase-js'
 import type { Workspace, Reminder } from '@/types'
 
@@ -20,11 +21,12 @@ interface Props {
 export async function AppShell({ user, workspaceId, children, activeNav = 'all' }: Props) {
   const supabase = await createClient()
 
-  const [wsData, remindersRes] = await Promise.all([
+  const [wsData, remindersRes, isPaid] = await Promise.all([
     supabase.from('workspace_users').select('workspaces(*)').eq('user_id', user.id),
     workspaceId
       ? supabase.from('reminders').select('*').eq('workspace_id', workspaceId).order('remind_at', { ascending: true })
       : Promise.resolve({ data: [] }),
+    getIsPaid(user.id),
   ])
 
   const workspaces: Workspace[] = ((wsData.data ?? []) as { workspaces: unknown }[])
@@ -45,6 +47,7 @@ export async function AppShell({ user, workspaceId, children, activeNav = 'all' 
         userId={user.id}
         isOwner={isOwner}
         activeNav={activeNav}
+        isPaid={isPaid}
       />
 
       <div className="flex-1 flex flex-col min-w-0 lg:overflow-y-auto">
@@ -91,6 +94,7 @@ export async function AppShell({ user, workspaceId, children, activeNav = 'all' 
           workspaces={workspaces}
           activeWorkspaceId={workspaceId ?? ''}
           remindersCount={reminders.length}
+          isPaid={isPaid}
         />
       </Suspense>
     </>
