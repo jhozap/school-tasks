@@ -72,9 +72,10 @@ interface Props {
   userId: string
   isOwner: boolean
   activeNav: ActiveNav
+  isPaid: boolean
 }
 
-export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, activeNav }: Props) {
+export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, activeNav, isPaid }: Props) {
   const ownedWorkspaces = workspaces.filter(w => w.created_by === userId)
   const memberWorkspaces = workspaces.filter(w => w.created_by !== userId)
 
@@ -132,7 +133,7 @@ export function Sidebar({ workspaces, activeWorkspaceId, userId, isOwner, active
       )}
 
       {/* Footer — expandable create button */}
-      <SidebarCreateButton />
+      <SidebarCreateButton isPaid={isPaid} />
     </aside>
   )
 }

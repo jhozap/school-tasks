@@ -51,3 +51,9 @@ export type WorkspaceInvitation = {
   used_at: string | null
   created_at: string
 }
+
+export type UserProfile = {
+  user_id: string
+  is_paid: boolean
+  updated_at: string
+}

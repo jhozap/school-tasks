@@ -7,9 +7,12 @@ import { deleteWorkspace } from '@/app/(app)/workspace-actions'
 import dynamic from 'next/dynamic'
 import { WorkspaceDeleteConfirm } from './WorkspaceDeleteConfirm'
 import type { Workspace } from '@/types'
+import type { TaskInitialValues } from '@/components/tasks/TaskModal'
 
 const TaskModal = dynamic(() => import('@/components/tasks/TaskModal').then(m => m.TaskModal))
 const ReminderModal = dynamic(() => import('@/components/tasks/ReminderModal').then(m => m.ReminderModal))
+const AICreateModal = dynamic(() => import('@/components/ai/AICreateModal').then(m => m.AICreateModal))
+const AIUpgradeBanner = dynamic(() => import('@/components/ai/AIUpgradeBanner').then(m => m.AIUpgradeBanner))
 
 function HomeIcon({ filled }: { filled?: boolean }) {
   return filled ? (
@@ -72,9 +75,10 @@ interface Props {
   workspaces: Workspace[]
   activeWorkspaceId: string
   remindersCount: number
+  isPaid: boolean
 }
 
-export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, remindersCount }: Props) {
+export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, remindersCount, isPaid }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -86,6 +90,9 @@ export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, re
   const [showReminderModal, setShowReminderModal] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false)
+  const [taskInitialValues, setTaskInitialValues] = useState<TaskInitialValues | undefined>()
 
   const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId)
   const isCalendar = pathname === '/calendar'
@@ -119,6 +126,12 @@ export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, re
   function openReminder() {
     setFabExpanded(false)
     setShowReminderModal(true)
+  }
+
+  function openAI() {
+    setFabExpanded(false)
+    if (isPaid) setShowAIModal(true)
+    else setShowUpgradeBanner(true)
   }
 
   const leftTabs = [
@@ -177,6 +190,35 @@ export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, re
             </span>
             <span className="text-[10px] font-semibold" style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}>
               Recordatorio
+            </span>
+          </button>
+
+          <button
+            onClick={openAI}
+            className="flex flex-col items-center gap-1.5"
+          >
+            <span
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+              style={{
+                background: isPaid ? 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)' : 'var(--muted)',
+                color: isPaid ? '#fff' : 'var(--muted-foreground)',
+                opacity: isPaid ? 1 : 0.7,
+              }}
+            >
+              {isPaid ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5Z" />
+                  <path d="M19 15l.8 2.4L22 18l-2.2.6L19 21l-.8-2.4L16 18l2.2-.6Z" />
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              )}
+            </span>
+            <span className="text-[10px] font-semibold" style={{ fontFamily: 'var(--font-inter)', color: 'var(--foreground)' }}>
+              Crear con IA
             </span>
           </button>
         </div>
@@ -341,8 +383,23 @@ export function BottomNav({ userEmail, userId, workspaces, activeWorkspaceId, re
         </div>
       )}
 
-      {showTaskModal && <TaskModal onClose={() => setShowTaskModal(false)} />}
+      {showTaskModal && (
+        <TaskModal
+          initialValues={taskInitialValues}
+          onClose={() => { setShowTaskModal(false); setTaskInitialValues(undefined) }}
+        />
+      )}
       {showReminderModal && <ReminderModal onClose={() => setShowReminderModal(false)} />}
+      {showAIModal && (
+        <AICreateModal
+          onClose={() => setShowAIModal(false)}
+          onExtracted={fields => {
+            setTaskInitialValues(fields)
+            setShowTaskModal(true)
+          }}
+        />
+      )}
+      {showUpgradeBanner && <AIUpgradeBanner onClose={() => setShowUpgradeBanner(false)} />}
     </>
   )
 }
