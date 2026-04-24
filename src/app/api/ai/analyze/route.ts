@@ -30,6 +30,21 @@ export async function POST(request: Request) {
 
   const formData = await request.formData()
   const mode = formData.get('mode') as string
+  if (mode !== 'image' && mode !== 'audio') {
+    return Response.json({ error: 'Modo inválido' }, { status: 400 })
+  }
+
+  const { data: usageCheck, error: usageError } = await supabase.rpc('check_and_increment_ai_usage', {
+    p_user_id: user.id,
+    p_mode: mode,
+  })
+  if (usageError || !usageCheck?.allowed) {
+    const label = mode === 'image' ? 'imágenes' : 'audios'
+    return Response.json(
+      { error: `Alcanzaste el límite de 10 análisis de ${label} por día. Vuelve mañana.` },
+      { status: 429 },
+    )
+  }
 
   const today = new Date().toISOString().split('T')[0]
   const systemPrompt = `You are an assistant that extracts task information from images and audio transcripts.
@@ -66,12 +81,10 @@ When viable is false, title, description and due_date must all be null.`
       { type: 'image_url', image_url: { url: `data:${mediaType};base64,${base64}` } },
       { type: 'text', text: 'Extract the task information from this image.' },
     ]
-  } else if (mode === 'audio') {
+  } else {
     const transcript = formData.get('transcript') as string | null
     if (!transcript?.trim()) return Response.json({ error: 'Transcripción vacía' }, { status: 400 })
     userContent = [{ type: 'text', text: transcript }]
-  } else {
-    return Response.json({ error: 'Modo inválido' }, { status: 400 })
   }
 
   try {
